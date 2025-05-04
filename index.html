@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Interactive Pokedex (1-1025) - Beta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Pokedex (1-1025) - Beta</title>
 
     <meta name="theme-color" content="#b82531">
 
@@ -23,7 +24,7 @@
         #intro-sprite[src=""] { display: none; }
         #intro-title { font-family: 'Pokemon Solid', Impact, sans-serif; font-size: 4.5em; font-weight: normal; color: #ffcb05; -webkit-text-stroke: 2.5px #2a75bb; text-stroke: 2.5px #2a75bb; paint-order: stroke fill; margin-bottom: 20px; }
         #intro-subtitle { font-size: 1em; color: #f1f1f1; margin-top: auto; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        #dev-credit-sprite { width: 64px; height: 64px; image-rendering: pixelated; vertical-align: middle; display: inline-block; }
+        #dev-credit-sprite { width: 44px; height: 44px; image-rendering: pixelated; vertical-align: middle; display: inline-block; }
         #dev-credit-sprite[src=""] { display: none; }
         #skip-intro-btn { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); padding: 8px 15px; background: rgba(0,0,0,0.3); color: white; border: 1px solid white; border-radius: 5px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s; }
         #skip-intro-btn:hover { background: rgba(0,0,0,0.5); }
@@ -112,12 +113,13 @@
         /* Utility class */
         .hidden { display: none !important; }
 
-        /* iOS Install Button Style */
+        /* iOS Install Button Style - Commented Out */
+        /*
         #ios-install-button {
-            display: block; /* Or inline-block */
-            margin: 15px auto 5px auto; /* Center below main content */
+            display: block;
+            margin: 15px auto 5px auto;
             padding: 10px 15px;
-            background-color: #007aff; /* iOS Blue */
+            background-color: #007aff;
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -129,6 +131,7 @@
         #ios-install-button:hover {
              background-color: #0056b3;
         }
+        */
 
     </style>
 </head>
@@ -178,8 +181,7 @@
             </div>
             <div id="list-view"></div>
         </div>
-         <a href="./pokedex.mobileconfig" download="pokedex.mobileconfig" id="ios-install-button">iOS Install</a>
-    </div>
+         </div>
 
     <script>
         // --- Constants, DOM Elements, State Variables ---
@@ -257,46 +259,15 @@
         function updateCollectionButton(id) { if (id === null || !isPokemonSaved(id)) { collectionBtn.textContent = 'Add'; collectionBtn.title = 'Add to Collection'; collectionBtn.classList.remove('saved'); collectionBtn.onclick = () => addPokemonToCollection(id); } else { collectionBtn.textContent = 'Remove'; collectionBtn.title = 'Remove from Collection'; collectionBtn.classList.add('saved'); collectionBtn.onclick = () => removePokemonFromCollection(id); } collectionBtn.disabled = (id === null); }
 
         // --- Initial Load Function ---
-        // Fetches intro sprites and main list/details async
         async function initializePokedex() {
             loadSavedPokemon();
-
             // --- Try to load Reshiram & Gothorita sprites for intro ---
             (async () => {
-                const introPokemonIDs = [643, 575]; // Reshiram, Gothorita
-                const elements = [introSpriteElement, devCreditSpriteElement];
-                const altTexts = ["Reshiram Animation", "Gothorita Sprite"];
-                try {
-                    const responses = await Promise.allSettled(
-                         introPokemonIDs.map(id => fetch(`${API_BASE_URL}${id}`))
-                    );
-                    responses.forEach(async (response, index) => {
-                         const element = elements[index]; const altText = altTexts[index];
-                         if (!element) return;
-                         if (response.status === 'fulfilled' && response.value.ok) {
-                             const data = await response.value.json();
-                             const animatedSprite = data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default;
-                             const officialArtwork = data.sprites.other?.['official-artwork']?.front_default;
-                             const defaultSprite = data.sprites.front_default;
-                             const spriteSrc = animatedSprite || officialArtwork || defaultSprite || '';
-                             if (spriteSrc) { element.src = spriteSrc; element.alt = altText; }
-                             else { element.style.display = 'none'; }
-                         } else { element.style.display = 'none'; console.warn(`Could not fetch intro sprite data for ID ${introPokemonIDs[index]}: ${response.reason || response.value?.status}`); }
-                     });
-                } catch (error) { console.error("Could not load intro sprites:", error); elements.forEach(el => { if (el) el.style.display = 'none'; }); }
+                const introPokemonIDs = [643, 575]; const elements = [introSpriteElement, devCreditSpriteElement]; const altTexts = ["Reshiram Animation", "Gothorita Sprite"];
+                try { const responses = await Promise.allSettled( introPokemonIDs.map(id => fetch(`${API_BASE_URL}${id}`)) ); responses.forEach(async (response, index) => { const element = elements[index]; const altText = altTexts[index]; if (!element) return; if (response.status === 'fulfilled' && response.value.ok) { const data = await response.value.json(); const animatedSprite = data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default; const officialArtwork = data.sprites.other?.['official-artwork']?.front_default; const defaultSprite = data.sprites.front_default; const spriteSrc = animatedSprite || officialArtwork || defaultSprite || ''; if (spriteSrc) { element.src = spriteSrc; element.alt = altText; } else { element.style.display = 'none'; } } else { element.style.display = 'none'; console.warn(`Could not fetch intro sprite data for ID ${introPokemonIDs[index]}: ${response.reason || response.value?.status}`); } }); } catch (error) { console.error("Could not load intro sprites:", error); elements.forEach(el => { if (el) el.style.display = 'none'; }); }
             })();
-
-            // --- Continue with main initialization (list fetch, etc.) ---
-            try {
-                (async () => {
-                    const response = await fetch(`${API_BASE_URL}?limit=${MAX_POKEMON}&offset=0`);
-                    if (!response.ok) { throw new Error(`Failed to fetch Pokémon list: ${response.status}`); }
-                    const listData = await response.json();
-                    allPokemonList = listData.results.map(p => ({ name: p.name, url: p.url, id: getPokemonIdFromUrl(p.url) })).filter(p => p.id != null && p.id <= MAX_POKEMON);
-                    renderListView();
-                    switchView('detail'); // Fetch #1 data in background
-                })().catch(error => { console.error("Initialization failed (list fetch):", error); showError(`Could not load Pokémon list or initial data. Please refresh. ${error.message}`); listViewBtn.disabled = true; });
-            } catch (error) { console.error("Initialization setup failed:", error); showError(`Initialization error. Please refresh. ${error.message}`); }
+            // --- Continue with main initialization ---
+            try { (async () => { const response = await fetch(`${API_BASE_URL}?limit=${MAX_POKEMON}&offset=0`); if (!response.ok) { throw new Error(`Failed to fetch Pokémon list: ${response.status}`); } const listData = await response.json(); allPokemonList = listData.results.map(p => ({ name: p.name, url: p.url, id: getPokemonIdFromUrl(p.url) })).filter(p => p.id != null && p.id <= MAX_POKEMON); renderListView(); switchView('detail'); })().catch(error => { console.error("Initialization failed (list fetch):", error); showError(`Could not load Pokémon list or initial data. Please refresh. ${error.message}`); listViewBtn.disabled = true; }); } catch (error) { console.error("Initialization setup failed:", error); showError(`Initialization error. Please refresh. ${error.message}`); }
         }
 
         // --- Event Listeners ---
@@ -310,10 +281,8 @@
 
         // --- Start Initialization & Splash Screen Timer ---
         document.addEventListener('DOMContentLoaded', () => {
-            initializePokedex(); // Start fetching data immediately
-            // Set timer to hide splash screen after 6 seconds
+            initializePokedex();
             introTimer = setTimeout(() => { if(introOverlay) { introOverlay.classList.add('hidden'); } }, 6000); // 6 seconds
-            // Add Skip Button Listener
             if (skipIntroBtn && introOverlay) { skipIntroBtn.addEventListener('click', () => { clearTimeout(introTimer); introOverlay.classList.add('hidden'); }); }
         });
 
@@ -321,3 +290,4 @@
 
 </body>
 </html>
+
