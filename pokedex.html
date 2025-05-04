@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Pokedex (1-1025) - Card View</title>
+    <style>
+        /* Basic Reset & Body Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align top for potentially longer content */
+            min-height: 100vh;
+            background-color: #d1d1d1; /* Light grey background */
+            padding: 15px;
+            /* Current Date: Sunday, May 4, 2025 */
+        }
+
+        /* Pokedex Container */
+        #pokedex-container {
+            background-color: #e63946; /* Pokedex Red */
+            border-radius: 15px;
+            padding: 15px;
+            border: 5px solid #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 480px; /* Slightly wider for card view */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Header: View Toggles & Search */
+        #pokedex-header {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            background-color: #b82531; /* Darker red accent */
+            border-radius: 8px;
+        }
+
+        .view-toggle-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .toggle-button {
+            padding: 8px 12px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .toggle-button.active {
+            background-color: #4a90e2; /* Blue highlight for active */
+            color: white;
+            font-weight: bold;
+        }
+        .toggle-button:not(.active):hover {
+            background-color: #ddd;
+        }
+
+        #search-controls {
+            display: flex;
+            gap: 5px;
+            flex-grow: 1; /* Allow search to take space */
+            min-width: 180px; /* Prevent excessive shrinking */
+        }
+
+        #search-input {
+            flex-grow: 1;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 0.9em;
+        }
+
+        #toggle-saved-btn {
+             padding: 8px 10px;
+             font-size: 0.9em;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             background-color: #f1f1f1; /* Default style */
+             color: #333;
+             transition: background-color 0.3s, color 0.3s;
+             white-space: nowrap; /* Prevent text wrapping */
+        }
+         #toggle-saved-btn.active {
+            background-color: #f5a623; /* Orange/Gold for saved active */
+            color: white;
+            font-weight: bold;
+        }
+
+
+        /* Content Area */
+        #content-area {
+             min-height: 450px; /* Give content area a minimum height */
+             position: relative; /* Needed for absolute positioning of views */
+        }
+
+        /* Detail View Wrapper */
+         #detail-view-wrapper {
+            display: flex; /* Use flex for internal structure */
+            flex-direction: column;
+            gap: 10px;
+         }
+         #detail-view-controls { /* Controls specific to detail view (like card/sprite toggle) */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5px; /* Add some padding */
+         }
+         #toggle-card-view-btn { /* Button for card/sprite toggle */
+             padding: 6px 10px;
+             font-size: 0.8em;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             background-color: #6c757d; /* Grey */
+             color: white;
+             transition: background-color 0.3s;
+         }
+         #toggle-card-view-btn.active { /* Style when card view is active */
+            background-color: #007bff; /* Blue */
+         }
+
+
+        /* Sprite View Container (Groups original display + stats) */
+        #sprite-view {
+            display: flex; /* Default state set by JS/wrapper class */
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Pokemon Display (Sprite View) */
+        #pokemon-display {
+            background-color: #f1f1f1; /* Inner screen background */
+            border: 3px solid #555;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative; /* For loading indicator & collection button */
+        }
+         #collection-btn { /* Add/Remove from Collection Button */
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 5px 8px;
+            font-size: 0.8em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4a90e2; /* Blue */
+            color: white;
+            transition: background-color 0.3s;
+            z-index: 10; /* Ensure it's above other elements */
+         }
+         #collection-btn.saved { /* Style when saved */
+            background-color: #f5a623; /* Orange/Gold when saved */
+         }
+          #collection-btn:hover {
+             opacity: 0.8;
+          }
+
+        #pokemon-info { width: 100%; }
+        #pokemon-name { text-transform: capitalize; font-size: 1.5em; font-weight: bold; margin-bottom: 5px; }
+        #pokemon-id { font-size: 0.9em; color: #555; margin-bottom: 10px; }
+        #pokemon-sprite { width: 120px; height: 120px; margin: 0 auto 10px auto; image-rendering: pixelated; /* Keep sprites crisp */ }
+        #pokemon-types { display: flex; justify-content: center; gap: 5px; }
+        .type-badge { padding: 3px 10px; border-radius: 5px; color: white; font-size: 0.8em; text-transform: uppercase; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.4); }
+
+        /* Pokemon Stats (Sprite View) */
+        #pokemon-stats {
+            background-color: #a8dadc; /* Light blue screen */
+            border: 3px solid #555;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.9em;
+        }
+        #pokemon-stats h3 { text-align: center; margin-bottom: 10px; color: #333; }
+        .stat-item { display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; margin-bottom: 8px; gap: 5px; }
+        .stat-label { text-transform: capitalize; font-weight: bold; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-bar-container { background-color: #e0e0e0; border-radius: 5px; height: 12px; overflow: hidden; border: 1px solid #ccc; }
+        .stat-bar { background-color: #4caf50; height: 100%; width: 0%; transition: width 0.5s ease-in-out; border-radius: 4px 0 0 4px; }
+        /* Color coding for stat bars */
+        .stat-item[data-stat="hp"] .stat-bar { background-color: #ff5959; }
+        .stat-item[data-stat="attack"] .stat-bar { background-color: #f08030; }
+        .stat-item[data-stat="defense"] .stat-bar { background-color: #f8d030; }
+        .stat-item[data-stat="special-attack"] .stat-bar { background-color: #6890f0; }
+        .stat-item[data-stat="special-defense"] .stat-bar { background-color: #78c850; }
+        .stat-item[data-stat="speed"] .stat-bar { background-color: #f85888; }
+        .stat-value { text-align: right; font-weight: bold; color: #333; }
+
+
+         /* Card View */
+         #card-view {
+             display: none; /* Hidden by default, shown via JS/wrapper class */
+             background-color: #fffbea; /* Creamy card background */
+             border: 5px solid #f5a623; /* Gold border */
+             border-radius: 15px;
+             padding: 15px;
+             min-height: 350px; /* Ensure minimum card height */
+             font-family: 'Georgia', serif; /* Slightly different font for card feel */
+             color: #4b3e2e; /* Dark brown text */
+             box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+             position: relative; /* For potential absolute elements inside */
+         }
+         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-bottom: 2px solid #dcd0b9; padding-bottom: 5px;}
+         .card-name { font-size: 1.4em; font-weight: bold; text-transform: capitalize; }
+         .card-hp { font-size: 1.1em; font-weight: bold; color: #e63946; /* Red HP */ }
+         .card-hp::before { content: 'HP '; font-size: 0.8em; color: #e63946; }
+         .card-types { display: flex; gap: 5px; margin-top: 5px; margin-bottom: 10px; justify-content: flex-end; }
+         #card-image-container {
+             text-align: center; background-color: #f0f0f0; /* Image background */
+             border: 2px solid #ccc; padding: 10px 0; margin: 10px 0;
+             min-height: 180px; display:flex; justify-content: center; align-items: center; border-radius: 5px;
+         }
+         #card-image { max-width: 80%; max-height: 180px; object-fit: contain; }
+         .card-details { font-size: 0.85em; margin-bottom: 10px; display: flex; justify-content: space-around; background-color: #eee; padding: 5px; border-radius: 5px;}
+         .card-abilities { margin-bottom: 10px; }
+         .card-abilities h4 { font-size: 0.9em; margin-bottom: 3px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+         .card-abilities ul { list-style: none; padding-left: 0; font-size: 0.85em; }
+         .card-abilities li { text-transform: capitalize; }
+         .card-flavor-text {
+            font-size: 0.8em; font-style: italic; color: #5c5246;
+            background-color: #f8f4e9; padding: 8px; border-radius: 5px;
+            border: 1px dashed #dcd0b9; min-height: 50px; margin-top: 10px;
+         }
+
+        /* Detail View Mode Switching (controlled by class on detail-view-wrapper) */
+        #detail-view-wrapper.show-card #sprite-view { display: none; }
+        #detail-view-wrapper.show-card #card-view { display: block; }
+        /* show-sprite is the default/fallback state */
+        #detail-view-wrapper:not(.show-card) #sprite-view { display: flex; }
+        #detail-view-wrapper:not(.show-card) #card-view { display: none; }
+
+
+        /* Navigation (Detail View - shared between sprite/card) */
+        #navigation {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-top: 10px; /* Add some space above nav */
+         }
+        /* Nav button styles */
+        .nav-button {
+             background-color: #4CAF50; border: none; color: white; padding: 12px 20px;
+             text-align: center; text-decoration: none; display: inline-block; font-size: 1em;
+             border-radius: 8px; cursor: pointer; transition: background-color 0.3s;
+             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+         }
+        .nav-button:hover:not(:disabled) { background-color: #45a049; }
+        .nav-button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.6; }
+
+        /* List View */
+        #list-view {
+            background-color: #f1f1f1;
+            border: 3px solid #555;
+            border-radius: 10px;
+            padding: 10px;
+            height: 500px; /* Fixed height for scrolling */
+            overflow-y: auto;
+            display: none; /* Initially hidden */
+            position: absolute; /* Position over the detail view space */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 6px; /* Slightly smaller padding */
+            margin-bottom: 4px;
+            background-color: #fff;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative; /* For saved indicator */
+        }
+        .list-item:hover {
+            background-color: #e9e9e9;
+        }
+        .list-item img {
+            width: 35px;
+            height: 35px;
+            margin-right: 8px;
+            image-rendering: pixelated;
+            background-color: #eee; /* Placeholder background */
+            border-radius: 50%;
+        }
+        .list-item-info {
+            flex-grow: 1;
+            overflow: hidden; /* Prevent long names from breaking layout */
+        }
+        .list-item-info .name {
+            text-transform: capitalize;
+            font-weight: bold;
+            font-size: 0.95em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .list-item-info .id {
+            font-size: 0.75em;
+            color: #666;
+        }
+        .saved-indicator {
+             position: absolute;
+             top: 5px;
+             right: 8px;
+             font-size: 1.1em; /* Star size */
+             color: #f5a623; /* Gold color */
+             display: none; /* Hidden by default */
+         }
+         .list-item.saved .saved-indicator {
+             display: block;
+         }
+
+
+        /* Loading/Error Indicator */
+        #loading-indicator, #error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: #555;
+            background-color: rgba(241, 241, 241, 0.9);
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 100; /* High z-index to be on top */
+            display: none; /* Hidden by default */
+            text-align: center;
+            max-width: 80%; /* Prevent it getting too wide */
+        }
+        #error-message {
+            color: #e63946; /* Red for errors */
+        }
+
+        /* Hide specific content on loading/error in Detail View */
+        #detail-view-wrapper.loading #sprite-view,
+        #detail-view-wrapper.loading #card-view,
+        #detail-view-wrapper.error #sprite-view,
+        #detail-view-wrapper.error #card-view {
+             visibility: hidden; /* Use visibility to keep layout space */
+        }
+        /* Show indicators when loading/error class is on wrapper */
+        #detail-view-wrapper.loading #loading-indicator,
+        #detail-view-wrapper.error #error-message {
+            display: block;
+        }
+
+         /* Utility class to explicitly hide elements */
+         .hidden {
+             display: none !important;
+         }
+
+    </style>
+</head>
+<body>
+
+    <div id="pokedex-container">
+        <div id="pokedex-header">
+            <div class="view-toggle-buttons">
+                <button id="detail-view-btn" class="toggle-button active">Detail</button>
+                <button id="list-view-btn" class="toggle-button">List</button>
+            </div>
+            <div id="search-controls">
+                <input type="text" id="search-input" placeholder="Search Name or ID (1-1025)...">
+                <button id="toggle-saved-btn" title="Show Saved Pokémon">⭐️ Saved</button>
+            </div>
+        </div>
+
+         <div id="loading-indicator">Loading...</div>
+         <div id="error-message">Error loading data.</div>
+
+        <div id="content-area">
+
+            <div id="detail-view-wrapper" class="show-sprite">
+
+                 <div id="detail-view-controls">
+                     <button id="toggle-card-view-btn" title="Toggle Card/Sprite View">Show Card</button>
+                     </div>
+
+                 <div id="sprite-view">
+                    <div id="pokemon-display">
+                        <button id="collection-btn" title="Add to Collection">Add</button>
+                        <div id="pokemon-info">
+                            <div id="pokemon-name">Pokémon</div>
+                            <div id="pokemon-id">#000</div>
+                            <img id="pokemon-sprite" src="" alt="Pokémon Sprite">
+                            <div id="pokemon-types">
+                                </div>
+                        </div>
+                    </div>
+                    <div id="pokemon-stats">
+                        <h3>Base Stats</h3>
+                        <div id="pokemon-stats-content">
+                            </div>
+                    </div>
+                </div>
+                <div id="card-view">
+                     <div class="card-header">
+                         <span id="card-name" class="card-name">Name</span>
+                         <span id="card-hp" class="card-hp">0</span>
+                     </div>
+                     <div id="card-types" class="card-types">
+                         </div>
+                     <div id="card-image-container">
+                         <img id="card-image" src="" alt="Pokemon Artwork">
+                     </div>
+                     <div id="card-details" class="card-details">
+                         <span id="card-height">Height: ?</span>
+                         <span id="card-weight">Weight: ?</span>
+                     </div>
+                     <div id="card-abilities" class="card-abilities">
+                         <h4>Abilities</h4>
+                         <ul id="card-abilities-list"><li>-</li></ul>
+                     </div>
+                     <div id="card-flavor-text" class="card-flavor-text">
+                         Flavor text not available.
+                     </div>
+                 </div>
+                 <div id="navigation">
+                    <button id="prev-btn" class="nav-button">Previous</button>
+                    <button id="next-btn" class="nav-button">Next</button>
+                </div>
+            </div>
+            <div id="list-view">
+                </div>
+            </div>
+        </div>
+    <script>
+        const MAX_POKEMON = 1025; // Increased limit
+        const API_BASE_URL = 'https://pokeapi.co/api/v2/pokemon/';
+        const API_SPECIES_URL = 'https://pokeapi.co/api/v2/pokemon-species/';
+        const SPRITE_URL_TEMPLATE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id}.png';
+
+        const TYPE_COLORS = { normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030', grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0', ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820', rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848', steel: '#B8B8D0', fairy: '#EE99AC' };
+        const MAX_STAT_VALUE = 200; // For scaling stat bars
+
+        // --- DOM Elements ---
+        // Header/Global
+        const detailWrapper = document.getElementById('detail-view-wrapper');
+        const listWrapper = document.getElementById('list-view');
+        const detailViewBtn = document.getElementById('detail-view-btn');
+        const listViewBtn = document.getElementById('list-view-btn');
+        const searchInput = document.getElementById('search-input');
+        const toggleSavedBtn = document.getElementById('toggle-saved-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMessage = document.getElementById('error-message');
+
+        // Detail View Specific Controls
+        const toggleCardViewBtn = document.getElementById('toggle-card-view-btn');
+        const collectionBtn = document.getElementById('collection-btn');
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+
+        // Sprite View Elements
+        const spriteViewContainer = document.getElementById('sprite-view');
+        const nameElement = document.getElementById('pokemon-name');
+        const idElement = document.getElementById('pokemon-id');
+        const spriteElement = document.getElementById('pokemon-sprite');
+        const typesElement = document.getElementById('pokemon-types'); // For sprite view
+        const statsContentElement = document.getElementById('pokemon-stats-content');
+
+         // Card View Elements
+         const cardViewContainer = document.getElementById('card-view');
+         const cardNameElement = document.getElementById('card-name');
+         const cardHpElement = document.getElementById('card-hp');
+         const cardTypesElement = document.getElementById('card-types'); // For card view
+         const cardImageElement = document.getElementById('card-image');
+         const cardHeightElement = document.getElementById('card-height');
+         const cardWeightElement = document.getElementById('card-weight');
+         const cardAbilitiesListElement = document.getElementById('card-abilities-list');
+         const cardFlavorTextElement = document.getElementById('card-flavor-text');
+
+
+        // --- State Variables ---
+        let currentPokemonId = 1;
+        let currentView = 'detail'; // 'detail' or 'list'
+        let detailViewMode = 'sprite'; // 'sprite' or 'card'
+        let allPokemonList = []; // Stores {name: string, url: string, id: number}
+        let savedPokemonIDs = []; // Stores IDs of saved Pokemon
+        let isShowingSaved = false; // Filter state for list view
+
+
+        // --- Helper Functions ---
+
+        function formatPokemonId(id) {
+            return `#${id.toString().padStart(3, '0')}`;
+        }
+
+        function getPokemonIdFromUrl(url) {
+            try {
+                return parseInt(url.split('/').filter(Boolean).pop());
+            } catch (e) {
+                console.error("Error parsing ID from URL:", url, e);
+                return null;
+            }
+        }
+
+        function showLoading(isLoading) {
+             // Global indicator visibility
+             loadingIndicator.style.display = isLoading ? 'block' : 'none';
+             if (isLoading) errorMessage.style.display = 'none';
+
+             // Apply loading class specifically to the detail view wrapper when active
+             if (currentView === 'detail') {
+                 detailWrapper.classList.toggle('loading', isLoading);
+                 // Ensure error class is removed when loading starts
+                 if(isLoading) detailWrapper.classList.remove('error');
+             }
+         }
+
+         function showError(message) {
+             errorMessage.textContent = message || 'An unknown error occurred.';
+             errorMessage.style.display = 'block'; // Show global error message
+             loadingIndicator.style.display = 'none'; // Hide loading indicator
+
+             if (currentView === 'detail') {
+                 detailWrapper.classList.add('error'); // Add error class to wrapper
+                 detailWrapper.classList.remove('loading'); // Remove loading class
+                 clearPokemonInfo(); // Clear detail view fields on error
+             }
+         }
+
+        // --- Local Storage Functions ---
+
+        function loadSavedPokemon() {
+            try {
+                const saved = localStorage.getItem('savedPokemonIDs');
+                savedPokemonIDs = saved ? JSON.parse(saved) : [];
+                if (!Array.isArray(savedPokemonIDs)) { // Basic validation
+                     savedPokemonIDs = [];
+                }
+            } catch (e) {
+                console.error("Error loading saved Pokemon:", e);
+                savedPokemonIDs = [];
+            }
+        }
+
+        function savePokemonToStorage() {
+            try {
+                localStorage.setItem('savedPokemonIDs', JSON.stringify(savedPokemonIDs));
+            } catch (e) {
+                 console.error("Error saving Pokemon to storage:", e);
+                 // Handle potential storage errors (e.g., quota exceeded) if necessary
+            }
+        }
+
+        function addPokemonToCollection(id) {
+            if (id !== null && !savedPokemonIDs.includes(id)) {
+                savedPokemonIDs.push(id);
+                savePokemonToStorage();
+                updateCollectionButton(id); // Update button in detail view
+                renderListView(searchInput.value, isShowingSaved); // Refresh list view
+            }
+        }
+
+        function removePokemonFromCollection(id) {
+            if (id !== null) {
+                savedPokemonIDs = savedPokemonIDs.filter(savedId => savedId !== id);
+                savePokemonToStorage();
+                updateCollectionButton(id); // Update button in detail view
+                renderListView(searchInput.value, isShowingSaved); // Refresh list view
+            }
+        }
+
+        function isPokemonSaved(id) {
+            return id !== null && savedPokemonIDs.includes(id);
+        }
+
+        // --- View Switching (Main View: Detail/List) ---
+
+        function switchView(view) {
+            currentView = view;
+            if (view === 'detail') {
+                detailWrapper.classList.remove('hidden');
+                listWrapper.style.display = 'none';
+                detailViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                // Fetch data ONLY if detail view isn't already showing valid data for current ID
+                // This prevents unnecessary refetching when just switching back
+                if (parseInt(idElement.textContent.substring(1)) !== currentPokemonId || detailWrapper.classList.contains('error')) {
+                     fetchPokemonData(currentPokemonId);
+                }
+            } else { // 'list'
+                detailWrapper.classList.add('hidden');
+                listWrapper.style.display = 'block';
+                detailViewBtn.classList.remove('active');
+                listViewBtn.classList.add('active');
+                renderListView(searchInput.value, isShowingSaved); // Refresh list view
+            }
+             // Hide global indicators when switching views successfully
+            showLoading(false);
+             errorMessage.style.display = 'none';
+             detailWrapper.classList.remove('error', 'loading'); // Clean up states
+        }
+
+         // --- Detail View Mode Switching (Sprite/Card) ---
+         function toggleDetailViewMode() {
+             detailViewMode = (detailViewMode === 'sprite') ? 'card' : 'sprite';
+             // Toggle the class on the wrapper which CSS uses to show/hide sections
+             detailWrapper.classList.toggle('show-sprite', detailViewMode === 'sprite');
+             detailWrapper.classList.toggle('show-card', detailViewMode === 'card');
+             // Update the button text/state
+             toggleCardViewBtn.textContent = (detailViewMode === 'sprite') ? 'Show Card' : 'Show Sprite';
+             toggleCardViewBtn.classList.toggle('active', detailViewMode === 'card');
+         }
+
+
+        // --- List View Rendering ---
+
+        function renderListView(filter = '', showOnlySaved = false) {
+             listWrapper.innerHTML = ''; // Clear previous list
+             let filteredList = allPokemonList;
+
+             // Filter by saved status
+             if (showOnlySaved) {
+                 filteredList = filteredList.filter(pokemon => isPokemonSaved(pokemon.id));
+             }
+
+             // Filter by search term (name or ID)
+             const searchTerm = filter.trim().toLowerCase();
+             if (searchTerm) {
+                 filteredList = filteredList.filter(pokemon =>
+                     pokemon.name.toLowerCase().includes(searchTerm) ||
+                     pokemon.id.toString() === searchTerm ||
+                     formatPokemonId(pokemon.id).toLowerCase() === searchTerm
+                 );
+             }
+
+             if (filteredList.length === 0) {
+                 listWrapper.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No Pokémon match your criteria.</p>';
+                 return;
+             }
+
+             // Use DocumentFragment for performance when adding many elements
+             const fragment = document.createDocumentFragment();
+             filteredList.forEach(pokemon => {
+                 const listItem = document.createElement('div');
+                 listItem.classList.add('list-item');
+                 listItem.dataset.id = pokemon.id;
+                 if (isPokemonSaved(pokemon.id)) {
+                     listItem.classList.add('saved');
+                 }
+
+                 const sprite = document.createElement('img');
+                 // Use the predictable URL for list view sprites
+                 sprite.src = SPRITE_URL_TEMPLATE.replace('{id}', pokemon.id);
+                 sprite.alt = `${pokemon.name} sprite`;
+                 sprite.loading = 'lazy'; // Improve performance by lazy loading images
+
+                 const info = document.createElement('div');
+                 info.classList.add('list-item-info');
+                 const name = document.createElement('div');
+                 name.classList.add('name');
+                 name.textContent = pokemon.name;
+                 const id = document.createElement('div');
+                 id.classList.add('id');
+                 id.textContent = formatPokemonId(pokemon.id);
+
+                 info.appendChild(name);
+                 info.appendChild(id);
+
+                 const savedIndicator = document.createElement('span');
+                 savedIndicator.classList.add('saved-indicator');
+                 savedIndicator.textContent = '★'; // Star character for saved Pokemon
+
+                 listItem.appendChild(sprite);
+                 listItem.appendChild(info);
+                 listItem.appendChild(savedIndicator);
+
+                 // Add click listener to switch to detail view for this Pokemon
+                 listItem.addEventListener('click', () => {
+                     currentPokemonId = pokemon.id; // Set the global current ID
+                     switchView('detail');       // Switch to the detail view
+                 });
+
+                 fragment.appendChild(listItem); // Add the completed item to the fragment
+             });
+             listWrapper.appendChild(fragment); // Append the fragment to the DOM once
+         }
+
+
+        // --- Detail View Functions ---
+
+        // Fetch data from BOTH pokemon and pokemon-species endpoints
+        async function fetchPokemonData(id) {
+            if (id < 1 || id > MAX_POKEMON) return;
+
+            showLoading(true); // Show loading indicator
+
+            try {
+                // Fetch base data and species data concurrently using Promise.all
+                const [pokemonResponse, speciesResponse] = await Promise.allSettled([ // Use allSettled to handle individual failures
+                    fetch(`${API_BASE_URL}${id}`),
+                    fetch(`${API_SPECIES_URL}${id}`)
+                ]);
+
+                let pokemonData = null;
+                let speciesData = null;
+                let fetchError = null;
+
+                // Process Pokemon data response
+                if (pokemonResponse.status === 'fulfilled' && pokemonResponse.value.ok) {
+                    pokemonData = await pokemonResponse.value.json();
+                } else {
+                    fetchError = new Error(`Pokemon data fetch failed: ${pokemonResponse.reason || pokemonResponse.value.status}`);
+                    console.error(fetchError);
+                }
+
+                // Process Species data response (optional, proceed even if it fails)
+                if (speciesResponse.status === 'fulfilled' && speciesResponse.value.ok) {
+                    speciesData = await speciesResponse.value.json();
+                } else {
+                     console.warn(`Species data fetch failed for ID ${id}: ${speciesResponse.reason || speciesResponse.value?.status}`);
+                     // Don't throw error here, card view can degrade gracefully
+                }
+
+                // If essential Pokemon data failed, show error and stop
+                if (!pokemonData) {
+                     throw fetchError || new Error('Essential Pokémon data could not be loaded.');
+                 }
+
+                updateUIDetail(pokemonData, speciesData); // Update UI with whatever data we got
+                showLoading(false); // Hide loading indicator
+
+            } catch (error) {
+                console.error("Failed to fetch Pokémon details:", error);
+                // Use the specific error message if available
+                showError(`Error loading data for Pokémon ${id}. ${error.message}`);
+            }
+        }
+
+         // Clear Detail View UI elements (both sprite and card parts)
+         function clearPokemonInfo() {
+             // Sprite View fields
+             nameElement.textContent = 'Error'; idElement.textContent = '#???';
+             spriteElement.src = ''; spriteElement.alt = 'Error loading sprite';
+             typesElement.innerHTML = ''; statsContentElement.innerHTML = '';
+             // Card View fields
+             cardNameElement.textContent = 'Error'; cardHpElement.textContent = '0';
+             cardTypesElement.innerHTML = ''; cardImageElement.src = ''; cardImageElement.alt = 'Error loading image';
+             cardHeightElement.textContent = 'Height: ?'; cardWeightElement.textContent = 'Weight: ?';
+             cardAbilitiesListElement.innerHTML = '<li>-</li>'; cardFlavorTextElement.textContent = 'Error loading data.';
+             // Common controls
+             updateCollectionButton(null); // Update button state for error
+             prevButton.disabled = true; // Disable navigation on error
+             nextButton.disabled = true;
+         }
+
+        // Update BOTH Sprite and Card UI parts with fetched data
+        function updateUIDetail(pokemonData, speciesData) {
+             if (!pokemonData) return; // Should be caught by fetchPokemonData, but safety first
+
+             currentPokemonId = pokemonData.id; // Ensure global ID is correct
+             detailWrapper.classList.remove('error', 'loading'); // Clear any error/loading states
+
+             // Extract data from pokemonData
+             const name = pokemonData.name;
+             const id = pokemonData.id;
+             const types = pokemonData.types.map(typeInfo => typeInfo.type.name);
+             const stats = pokemonData.stats;
+             const height = pokemonData.height / 10; // Decimetres to meters
+             const weight = pokemonData.weight / 10; // Hectograms to kilograms
+             const abilities = pokemonData.abilities.map(abilityInfo => abilityInfo.ability.name.replace('-', ' ')); // Nicer formatting
+             const officialArtwork = pokemonData.sprites.other?.['official-artwork']?.front_default;
+             const defaultSprite = pokemonData.sprites.front_default;
+             const animatedSprite = pokemonData.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default;
+
+             // --- Update Sprite View ---
+             nameElement.textContent = name;
+             idElement.textContent = formatPokemonId(id);
+             // Sprite Fallback Logic: Animated (Gen 1-5) -> Official Artwork -> Default Static
+             spriteElement.src = animatedSprite || officialArtwork || defaultSprite || '';
+             spriteElement.alt = `${name} sprite`;
+             updateTypesBadges(types, typesElement); // Use helper for types
+             // Update Stats Bars
+             statsContentElement.innerHTML = ''; // Clear previous stats
+             const statMap = { 'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense', 'special-attack': 'Sp. Atk', 'special-defense': 'Sp. Def', 'speed': 'Speed' };
+             ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'].forEach(statKey => {
+                 const statData = stats.find(s => s.stat.name === statKey);
+                 if (statData) {
+                     const statValue = statData.base_stat;
+                     const statName = statMap[statKey];
+                     const statPercentage = Math.min(100, (statValue / MAX_STAT_VALUE) * 100); // Cap bar at 100% visually
+                     // Create stat item elements (label, bar container, bar, value)
+                     const item = document.createElement('div'); item.classList.add('stat-item'); item.dataset.stat = statKey;
+                     const label = document.createElement('span'); label.classList.add('stat-label'); label.textContent = statName;
+                     const barContainer = document.createElement('div'); barContainer.classList.add('stat-bar-container');
+                     const bar = document.createElement('div'); bar.classList.add('stat-bar');
+                      // Apply width in next frame for CSS transition
+                      requestAnimationFrame(() => { bar.style.width = `${statPercentage}%`; });
+                     barContainer.appendChild(bar);
+                     const value = document.createElement('span'); value.classList.add('stat-value'); value.textContent = statValue;
+                     item.appendChild(label); item.appendChild(barContainer); item.appendChild(value);
+                     statsContentElement.appendChild(item);
+                 }
+             });
+
+
+             // --- Update Card View ---
+             cardNameElement.textContent = name;
+             const hpStat = stats.find(s => s.stat.name === 'hp');
+             cardHpElement.textContent = hpStat ? hpStat.base_stat : '?'; // Show HP value
+             updateTypesBadges(types, cardTypesElement); // Use helper for card types
+             // Card Image: Official Artwork or Default Static
+             cardImageElement.src = officialArtwork || defaultSprite || '';
+             cardImageElement.alt = `${name} artwork`;
+             cardHeightElement.textContent = `Height: ${height.toFixed(1)} m`; // Format height
+             cardWeightElement.textContent = `Weight: ${weight.toFixed(1)} kg`; // Format weight
+             // Abilities List
+             cardAbilitiesListElement.innerHTML = ''; // Clear previous
+             if (abilities.length > 0) {
+                 abilities.forEach(ability => {
+                     const li = document.createElement('li');
+                     li.textContent = ability;
+                     cardAbilitiesListElement.appendChild(li);
+                 });
+             } else {
+                 cardAbilitiesListElement.innerHTML = '<li>-</li>'; // Placeholder if no abilities
+             }
+             // Flavor Text (requires speciesData)
+             let flavorText = 'Flavor text not available.';
+             if (speciesData && speciesData.flavor_text_entries) {
+                 const englishEntry = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
+                 if (englishEntry) {
+                      // Clean up flavor text (remove form feeds, newlines, etc.)
+                     flavorText = englishEntry.flavor_text.replace(/[\n\f\r]/g, ' ').replace(/­/g, ''); // Also remove soft hyphens
+                 }
+             }
+             cardFlavorTextElement.textContent = flavorText;
+
+
+             // --- Update Shared Controls ---
+             prevButton.disabled = id === 1; // Disable prev if first Pokemon
+             nextButton.disabled = id === MAX_POKEMON; // Disable next if last Pokemon
+             updateCollectionButton(id); // Update Add/Remove button state
+         }
+
+          // Helper function to update type badges in both sprite and card views
+          function updateTypesBadges(types, containerElement) {
+             containerElement.innerHTML = ''; // Clear previous types
+             types.forEach(typeName => {
+                 const badge = document.createElement('span');
+                 badge.classList.add('type-badge');
+                 badge.textContent = typeName;
+                 // Apply color based on type
+                 badge.style.backgroundColor = TYPE_COLORS[typeName] || '#777'; // Fallback color
+                 containerElement.appendChild(badge);
+             });
+         }
+
+
+        // Update the Add/Remove Collection button text, style, and click behavior
+        function updateCollectionButton(id) {
+            if (id === null || !isPokemonSaved(id)) { // If not saved or ID is invalid
+                collectionBtn.textContent = 'Add';
+                collectionBtn.title = 'Add to Collection';
+                collectionBtn.classList.remove('saved'); // Ensure 'saved' style is removed
+                collectionBtn.onclick = () => addPokemonToCollection(id); // Set click to add
+            } else { // If saved
+                collectionBtn.textContent = 'Remove';
+                collectionBtn.title = 'Remove from Collection';
+                collectionBtn.classList.add('saved'); // Add 'saved' style
+                collectionBtn.onclick = () => removePokemonFromCollection(id); // Set click to remove
+            }
+            collectionBtn.disabled = (id === null); // Disable button if ID is invalid (e.g., during error)
+        }
+
+
+        // --- Initial Load Function ---
+        async function initializePokedex() {
+            showLoading(true); // Show loading indicator during init
+            loadSavedPokemon(); // Load saved IDs from localStorage first
+
+            try {
+                // Fetch the basic list of all Pokemon names and URLs up to MAX_POKEMON
+                const response = await fetch(`${API_BASE_URL}?limit=${MAX_POKEMON}&offset=0`);
+                if (!response.ok) {
+                     throw new Error(`Failed to fetch Pokémon list: ${response.status}`);
+                }
+                const listData = await response.json();
+
+                // Process the list, extracting name, URL, and ID
+                allPokemonList = listData.results.map(pokemon => ({
+                    name: pokemon.name,
+                    url: pokemon.url,
+                    id: getPokemonIdFromUrl(pokemon.url) // Extract ID using helper
+                })).filter(p => p.id != null && p.id <= MAX_POKEMON); // Ensure ID parsed correctly and within range
+
+                renderListView(); // Render the initial list view (even though it's hidden)
+                switchView('detail'); // Switch to detail view (this will trigger fetch for ID 1)
+
+            } catch (error) {
+                console.error("Initialization failed:", error);
+                 showError(`Could not load Pokémon list. Please refresh. ${error.message}`);
+                 listViewBtn.disabled = true; // Disable list view button if the list fails
+                 showLoading(false); // Hide loading indicator on init failure
+            }
+            // Loading indicator is hidden within switchView/fetchPokemonData on success
+        }
+
+        // --- Event Listeners ---
+        // View Toggles (Detail/List)
+        detailViewBtn.addEventListener('click', () => switchView('detail'));
+        listViewBtn.addEventListener('click', () => switchView('list'));
+
+        // Search Input (filters list view live)
+        searchInput.addEventListener('input', () => {
+            renderListView(searchInput.value, isShowingSaved);
+        });
+
+         // Toggle Saved Filter Button
+         toggleSavedBtn.addEventListener('click', () => {
+             isShowingSaved = !isShowingSaved; // Toggle the state
+             toggleSavedBtn.classList.toggle('active', isShowingSaved); // Update button style
+             toggleSavedBtn.title = isShowingSaved ? "Show All Pokémon" : "Show Saved Pokémon"; // Update tooltip
+             renderListView(searchInput.value, isShowingSaved); // Re-render list with new filter
+         });
+
+        // Detail View Mode Toggle (Sprite/Card)
+         toggleCardViewBtn.addEventListener('click', toggleDetailViewMode);
+
+        // Detail View Navigation (Previous/Next)
+        prevButton.addEventListener('click', () => {
+            if (currentPokemonId > 1) {
+                fetchPokemonData(currentPokemonId - 1); // Fetch previous Pokemon
+            }
+        });
+        nextButton.addEventListener('click', () => {
+            if (currentPokemonId < MAX_POKEMON) {
+                fetchPokemonData(currentPokemonId + 1); // Fetch next Pokemon
+            }
+        });
+
+        // Add/Remove collection button listener is attached dynamically in updateCollectionButton
+
+        // --- Start Initialization ---
+        // Run the initialization function once the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializePokedex);
+
+    </script>
+
+</body>
+</html>
