@@ -20,7 +20,6 @@
             min-height: 100vh;
             background-color: #d1d1d1; /* Light grey background */
             padding: 15px;
-            /* Current Date: Sunday, May 4, 2025 */
         }
 
         /* Pokedex Container */
@@ -74,6 +73,7 @@
         }
 
         #search-controls {
+            /* Default display is handled by parent flexbox, JS controls hide/show */
             display: flex;
             gap: 5px;
             flex-grow: 1; /* Allow search to take space */
@@ -141,7 +141,7 @@
 
         /* Sprite View Container (Groups original display + stats) */
         #sprite-view {
-            display: flex; /* Default state set by JS/wrapper class */
+            /* display is controlled by JS via parent wrapper class */
             flex-direction: column;
             gap: 15px;
         }
@@ -213,7 +213,7 @@
 
          /* Card View */
          #card-view {
-             display: none; /* Hidden by default, shown via JS/wrapper class */
+             /* display is controlled by JS via parent wrapper class */
              background-color: #fffbea; /* Creamy card background */
              border: 5px solid #f5a623; /* Gold border */
              border-radius: 15px;
@@ -250,7 +250,7 @@
         #detail-view-wrapper.show-card #sprite-view { display: none; }
         #detail-view-wrapper.show-card #card-view { display: block; }
         /* show-sprite is the default/fallback state */
-        #detail-view-wrapper:not(.show-card) #sprite-view { display: flex; }
+        #detail-view-wrapper:not(.show-card) #sprite-view { display: flex; } /* Use flex for default */
         #detail-view-wrapper:not(.show-card) #card-view { display: none; }
 
 
@@ -467,6 +467,7 @@
         const listWrapper = document.getElementById('list-view');
         const detailViewBtn = document.getElementById('detail-view-btn');
         const listViewBtn = document.getElementById('list-view-btn');
+        const searchControlsElement = document.getElementById('search-controls'); // Reference for search/saved controls container
         const searchInput = document.getElementById('search-input');
         const toggleSavedBtn = document.getElementById('toggle-saved-btn');
         const loadingIndicator = document.getElementById('loading-indicator');
@@ -567,7 +568,6 @@
                 localStorage.setItem('savedPokemonIDs', JSON.stringify(savedPokemonIDs));
             } catch (e) {
                  console.error("Error saving Pokemon to storage:", e);
-                 // Handle potential storage errors (e.g., quota exceeded) if necessary
             }
         }
 
@@ -575,8 +575,8 @@
             if (id !== null && !savedPokemonIDs.includes(id)) {
                 savedPokemonIDs.push(id);
                 savePokemonToStorage();
-                updateCollectionButton(id); // Update button in detail view
-                renderListView(searchInput.value, isShowingSaved); // Refresh list view
+                updateCollectionButton(id);
+                renderListView(searchInput.value, isShowingSaved);
             }
         }
 
@@ -584,8 +584,8 @@
             if (id !== null) {
                 savedPokemonIDs = savedPokemonIDs.filter(savedId => savedId !== id);
                 savePokemonToStorage();
-                updateCollectionButton(id); // Update button in detail view
-                renderListView(searchInput.value, isShowingSaved); // Refresh list view
+                updateCollectionButton(id);
+                renderListView(searchInput.value, isShowingSaved);
             }
         }
 
@@ -602,9 +602,13 @@
                 listWrapper.style.display = 'none';
                 detailViewBtn.classList.add('active');
                 listViewBtn.classList.remove('active');
+                searchControlsElement.style.display = 'none'; // <<< HIDE search/saved controls
+
                 // Fetch data ONLY if detail view isn't already showing valid data for current ID
-                // This prevents unnecessary refetching when just switching back
-                if (parseInt(idElement.textContent.substring(1)) !== currentPokemonId || detailWrapper.classList.contains('error')) {
+                // or if there was a previous error.
+                const displayedIdElement = detailWrapper.querySelector('#pokemon-id');
+                const displayedId = displayedIdElement ? parseInt(displayedIdElement.textContent.substring(1)) : null;
+                if (displayedId !== currentPokemonId || detailWrapper.classList.contains('error')) {
                      fetchPokemonData(currentPokemonId);
                 }
             } else { // 'list'
@@ -612,13 +616,16 @@
                 listWrapper.style.display = 'block';
                 detailViewBtn.classList.remove('active');
                 listViewBtn.classList.add('active');
-                renderListView(searchInput.value, isShowingSaved); // Refresh list view
+                searchControlsElement.style.display = 'flex'; // <<< SHOW search/saved controls
+
+                renderListView(searchInput.value, isShowingSaved); // Refresh list view if needed
             }
              // Hide global indicators when switching views successfully
             showLoading(false);
              errorMessage.style.display = 'none';
-             detailWrapper.classList.remove('error', 'loading'); // Clean up states
+             detailWrapper.classList.remove('error', 'loading'); // Clean up states on detail view wrapper
         }
+
 
          // --- Detail View Mode Switching (Sprite/Card) ---
          function toggleDetailViewMode() {
@@ -715,8 +722,8 @@
             showLoading(true); // Show loading indicator
 
             try {
-                // Fetch base data and species data concurrently using Promise.all
-                const [pokemonResponse, speciesResponse] = await Promise.allSettled([ // Use allSettled to handle individual failures
+                // Fetch base data and species data concurrently using Promise.allSettled
+                const [pokemonResponse, speciesResponse] = await Promise.allSettled([
                     fetch(`${API_BASE_URL}${id}`),
                     fetch(`${API_SPECIES_URL}${id}`)
                 ]);
@@ -729,16 +736,19 @@
                 if (pokemonResponse.status === 'fulfilled' && pokemonResponse.value.ok) {
                     pokemonData = await pokemonResponse.value.json();
                 } else {
-                    fetchError = new Error(`Pokemon data fetch failed: ${pokemonResponse.reason || pokemonResponse.value.status}`);
+                    // Construct a meaningful error message
+                    const reason = pokemonResponse.reason || `Status ${pokemonResponse.value?.status}`;
+                    fetchError = new Error(`Pokemon data fetch failed: ${reason}`);
                     console.error(fetchError);
                 }
 
-                // Process Species data response (optional, proceed even if it fails)
+                // Process Species data response (optional)
                 if (speciesResponse.status === 'fulfilled' && speciesResponse.value.ok) {
                     speciesData = await speciesResponse.value.json();
                 } else {
-                     console.warn(`Species data fetch failed for ID ${id}: ${speciesResponse.reason || speciesResponse.value?.status}`);
-                     // Don't throw error here, card view can degrade gracefully
+                     // Log warning but don't necessarily stop the process
+                     const reason = speciesResponse.reason || `Status ${speciesResponse.value?.status}`;
+                     console.warn(`Species data fetch failed for ID ${id}: ${reason}`);
                 }
 
                 // If essential Pokemon data failed, show error and stop
@@ -746,12 +756,11 @@
                      throw fetchError || new Error('Essential Pokémon data could not be loaded.');
                  }
 
-                updateUIDetail(pokemonData, speciesData); // Update UI with whatever data we got
+                updateUIDetail(pokemonData, speciesData); // Update UI with whatever data was fetched
                 showLoading(false); // Hide loading indicator
 
             } catch (error) {
                 console.error("Failed to fetch Pokémon details:", error);
-                // Use the specific error message if available
                 showError(`Error loading data for Pokémon ${id}. ${error.message}`);
             }
         }
@@ -775,7 +784,7 @@
 
         // Update BOTH Sprite and Card UI parts with fetched data
         function updateUIDetail(pokemonData, speciesData) {
-             if (!pokemonData) return; // Should be caught by fetchPokemonData, but safety first
+             if (!pokemonData) return; // Safety check
 
              currentPokemonId = pokemonData.id; // Ensure global ID is correct
              detailWrapper.classList.remove('error', 'loading'); // Clear any error/loading states
@@ -847,10 +856,17 @@
              // Flavor Text (requires speciesData)
              let flavorText = 'Flavor text not available.';
              if (speciesData && speciesData.flavor_text_entries) {
-                 const englishEntry = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
-                 if (englishEntry) {
-                      // Clean up flavor text (remove form feeds, newlines, etc.)
-                     flavorText = englishEntry.flavor_text.replace(/[\n\f\r]/g, ' ').replace(/­/g, ''); // Also remove soft hyphens
+                 // Find the first English flavor text entry, preferring entries from recent games if possible
+                 const englishEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'en');
+                 const preferredVersions = ['scarlet', 'violet', 'sword', 'shield', 'lets-go-pikachu', 'ultra-sun', 'sun']; // Add more as needed
+                 let bestEntry = englishEntries.find(entry => preferredVersions.includes(entry.version.name));
+                 if (!bestEntry && englishEntries.length > 0) {
+                     bestEntry = englishEntries[englishEntries.length - 1]; // Fallback to the last english entry
+                 }
+
+                 if (bestEntry) {
+                      // Clean up flavor text (remove form feeds, newlines, soft hyphens etc.)
+                     flavorText = bestEntry.flavor_text.replace(/[\n\f\r\u00ad]/g, ' ').replace(/\s+/g, ' ').trim();
                  }
              }
              cardFlavorTextElement.textContent = flavorText;
@@ -949,11 +965,13 @@
         // Detail View Navigation (Previous/Next)
         prevButton.addEventListener('click', () => {
             if (currentPokemonId > 1) {
+                // Don't decrement currentPokemonId here, let fetchPokemonData update it on success
                 fetchPokemonData(currentPokemonId - 1); // Fetch previous Pokemon
             }
         });
         nextButton.addEventListener('click', () => {
             if (currentPokemonId < MAX_POKEMON) {
+                // Don't increment currentPokemonId here, let fetchPokemonData update it on success
                 fetchPokemonData(currentPokemonId + 1); // Fetch next Pokemon
             }
         });
