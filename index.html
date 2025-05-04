@@ -2,119 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Pokedex (1-1025) - Beta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Interactive Pokedex (1-1025) - Beta</title>
+
+    <meta name="theme-color" content="#b82531">
+
     <style>
         /* Font Embedding (Replace with your Base64 data) */
         @font-face {
             font-family: 'Pokemon Solid';
-            /* Paste your Base64 Data URI here */
-            /* Example format: src: url(data:font/woff2;base64,YOUR_BASE64_FONT_DATA_HERE) format('woff2'); */
-            /* Make sure to get the correct format ('woff2', 'woff', 'truetype') based on your input file */
-             src: url(data:font/woff2;base64, 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) format('woff2'); /* !!! REPLACE THIS LINE'S DATA !!! */
-
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap; /* Use swap so text shows in fallback while loading */
+             src: url(data:font/woff2;base64,PASTE_YOUR_BASE64_FONT_DATA_HERE) format('woff2'); /* !!! REPLACE THIS LINE'S DATA !!! */
+            font-weight: normal; font-style: normal; font-display: swap;
         }
-
         /* Basic Reset & Body Styling */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            background-color: #d1d1d1;
-            padding: 15px;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Arial', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background-color: #d1d1d1; padding: 15px; }
         /* Intro Overlay Styles */
-        #intro-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #e63946; display: flex; justify-content: center; align-items: center;
-            z-index: 200; opacity: 1; visibility: visible;
-            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
-        }
-        #intro-content {
-            text-align: center; color: white; position: relative;
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding-bottom: 60px;
-        }
-        #intro-sprite { /* Reshiram */
-            width: 150px; height: 150px; image-rendering: pixelated;
-            margin-bottom: 15px; display: block;
-        }
+        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #e63946; display: flex; justify-content: center; align-items: center; z-index: 200; opacity: 1; visibility: visible; transition: opacity 0.8s ease-out, visibility 0.8s ease-out; }
+        #intro-content { text-align: center; color: white; position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding-bottom: 60px; }
+        #intro-sprite { width: 150px; height: 150px; image-rendering: pixelated; margin-bottom: 15px; display: block; }
         #intro-sprite[src=""] { display: none; }
-
-        #intro-title {
-            font-family: 'Pokemon Solid', Impact, sans-serif; /* Apply Pokemon font */
-            font-size: 4.5em; /* Adjust size if needed */
-            font-weight: normal; /* Font likely includes weight */
-            color: #ffcb05; /* Pokemon Yellow */
-            -webkit-text-stroke: 2.5px #2a75bb; /* Pokemon Blue outline */
-            text-stroke: 2.5px #2a75bb;
-            paint-order: stroke fill; /* Draw stroke behind fill */
-            margin-bottom: 20px;
-        }
-
-        #intro-subtitle {
-            font-size: 1em; color: #f1f1f1; margin-top: auto;
-            margin-bottom: 15px; /* Position above skip button */
-            display: flex; /* Align text and Gothorita */
-            align-items: center;
-            justify-content: center;
-            gap: 8px; /* Space between text and sprite */
-        }
-        #dev-credit-sprite { /* Gothorita */
-             width: 64px; height: 64px;
-             image-rendering: pixelated;
-             vertical-align: middle; /* Helps align with text if flex fails */
-             display: inline-block; /* Treat like text for alignment */
-        }
+        #intro-title { font-family: 'Pokemon Solid', Impact, sans-serif; font-size: 4.5em; font-weight: normal; color: #ffcb05; -webkit-text-stroke: 2.5px #2a75bb; text-stroke: 2.5px #2a75bb; paint-order: stroke fill; margin-bottom: 20px; }
+        #intro-subtitle { font-size: 1em; color: #f1f1f1; margin-top: auto; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        #dev-credit-sprite { width: 30px; height: 30px; image-rendering: pixelated; vertical-align: middle; display: inline-block; }
         #dev-credit-sprite[src=""] { display: none; }
-
-        #skip-intro-btn {
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            padding: 8px 15px; background: rgba(0,0,0,0.3); color: white;
-            border: 1px solid white; border-radius: 5px; cursor: pointer;
-            font-size: 0.9em; transition: background-color 0.3s;
-        }
+        #skip-intro-btn { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); padding: 8px 15px; background: rgba(0,0,0,0.3); color: white; border: 1px solid white; border-radius: 5px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s; }
         #skip-intro-btn:hover { background: rgba(0,0,0,0.5); }
         #intro-overlay.hidden { opacity: 0; visibility: hidden; }
-
-
         /* Pokedex Container */
-        #pokedex-container {
-            background-color: #e63946; border-radius: 15px; padding: 15px; border: 5px solid #333;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); max-width: 480px; width: 100%;
-            display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1;
-        }
+        #pokedex-container { background-color: #e63946; border-radius: 15px; padding: 15px; border: 5px solid #333; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); max-width: 480px; width: 100%; display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
         /* Header */
-        #pokedex-header {
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
-            padding: 5px; background-color: #b82531; border-radius: 8px; position: relative;
-        }
-        #beta-indicator {
-            position: absolute; top: 8px; right: 8px; font-size: 0.7em; font-weight: bold;
-            color: rgba(255, 255, 255, 0.7); background-color: rgba(0,0,0,0.2);
-            padding: 2px 5px; border-radius: 3px; z-index: 5; pointer-events: none;
-        }
+        #pokedex-header { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; padding: 5px; background-color: #b82531; border-radius: 8px; position: relative; }
+        #beta-indicator { position: absolute; top: 8px; right: 8px; font-size: 0.7em; font-weight: bold; color: rgba(255, 255, 255, 0.7); background-color: rgba(0,0,0,0.2); padding: 2px 5px; border-radius: 3px; z-index: 5; pointer-events: none; }
         .view-toggle-buttons { display: flex; gap: 5px; }
-        .toggle-button { /* ... */ padding: 8px 12px; font-size: 0.9em; border: none; border-radius: 5px; cursor: pointer; background-color: #f1f1f1; color: #333; transition: background-color 0.3s, color 0.3s; }
-        .toggle-button.active { /* ... */ background-color: #4a90e2; color: white; font-weight: bold; }
-        .toggle-button:not(.active):hover { /* ... */ background-color: #ddd; }
+        .toggle-button { padding: 8px 12px; font-size: 0.9em; border: none; border-radius: 5px; cursor: pointer; background-color: #f1f1f1; color: #333; transition: background-color 0.3s, color 0.3s; }
+        .toggle-button.active { background-color: #4a90e2; color: white; font-weight: bold; }
+        .toggle-button:not(.active):hover { background-color: #ddd; }
         #search-controls { display: flex; gap: 5px; flex-grow: 1; min-width: 180px; margin-right: 45px; }
-        #search-input { /* ... */ flex-grow: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9em; }
-        #toggle-saved-btn { /* ... */ padding: 8px 10px; font-size: 0.9em; border: none; border-radius: 5px; cursor: pointer; background-color: #f1f1f1; color: #333; transition: background-color 0.3s, color 0.3s; white-space: nowrap; }
-         #toggle-saved-btn.active { /* ... */ background-color: #f5a623; color: white; font-weight: bold; }
-
+        #search-input { flex-grow: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9em; }
+        #toggle-saved-btn { padding: 8px 10px; font-size: 0.9em; border: none; border-radius: 5px; cursor: pointer; background-color: #f1f1f1; color: #333; transition: background-color 0.3s, color 0.3s; white-space: nowrap; }
+         #toggle-saved-btn.active { background-color: #f5a623; color: white; font-weight: bold; }
         /* Content Area */
         #content-area { min-height: 450px; position: relative; }
         /* Detail View Wrapper */
@@ -122,7 +48,6 @@
          #detail-view-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 5px; }
          #toggle-card-view-btn { padding: 6px 10px; font-size: 0.8em; border: none; border-radius: 5px; cursor: pointer; background-color: #6c757d; color: white; transition: background-color 0.3s; }
          #toggle-card-view-btn.active { background-color: #007bff; }
-
         /* Sprite View Container */
         #sprite-view { flex-direction: column; gap: 15px; }
         #pokemon-display { background-color: #f1f1f1; border: 3px solid #555; border-radius: 10px; padding: 15px; text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
@@ -134,71 +59,76 @@
         #pokemon-id { font-size: 0.9em; color: #555; margin-bottom: 10px; }
         #pokemon-sprite { width: 120px; height: 120px; margin: 0 auto 10px auto; image-rendering: pixelated; }
         #pokemon-types { display: flex; justify-content: center; gap: 5px; }
-        .type-badge { /* ... */ padding: 3px 10px; border-radius: 5px; color: white; font-size: 0.8em; text-transform: uppercase; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.4); }
-
+        .type-badge { padding: 3px 10px; border-radius: 5px; color: white; font-size: 0.8em; text-transform: uppercase; font-weight: bold; text-shadow: 1px 1px 1px rgba(0,0,0,0.4); }
         /* Pokemon Stats (Sprite View) */
         #pokemon-stats { background-color: #a8dadc; border: 3px solid #555; border-radius: 10px; padding: 15px; font-size: 0.9em; }
-        #pokemon-stats h3 { /* ... */ text-align: center; margin-bottom: 10px; color: #333; }
-        .stat-item { /* ... */ display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; margin-bottom: 8px; gap: 5px; }
-        .stat-label { /* ... */ text-transform: capitalize; font-weight: bold; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .stat-bar-container { /* ... */ background-color: #e0e0e0; border-radius: 5px; height: 12px; overflow: hidden; border: 1px solid #ccc; }
-        .stat-bar { /* ... */ background-color: #4caf50; height: 100%; width: 0%; transition: width 0.5s ease-in-out; border-radius: 4px 0 0 4px; }
-        /* Stat bar colors */
-        .stat-item[data-stat="hp"] .stat-bar { background-color: #ff5959; }
-        .stat-item[data-stat="attack"] .stat-bar { background-color: #f08030; }
-        .stat-item[data-stat="defense"] .stat-bar { background-color: #f8d030; }
-        .stat-item[data-stat="special-attack"] .stat-bar { background-color: #6890f0; }
-        .stat-item[data-stat="special-defense"] .stat-bar { background-color: #78c850; }
-        .stat-item[data-stat="speed"] .stat-bar { background-color: #f85888; }
-        .stat-value { /* ... */ text-align: right; font-weight: bold; color: #333; }
-
+        #pokemon-stats h3 { text-align: center; margin-bottom: 10px; color: #333; }
+        .stat-item { display: grid; grid-template-columns: 80px 1fr 30px; align-items: center; margin-bottom: 8px; gap: 5px; }
+        .stat-label { text-transform: capitalize; font-weight: bold; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .stat-bar-container { background-color: #e0e0e0; border-radius: 5px; height: 12px; overflow: hidden; border: 1px solid #ccc; }
+        .stat-bar { background-color: #4caf50; height: 100%; width: 0%; transition: width 0.5s ease-in-out; border-radius: 4px 0 0 4px; }
+        .stat-item[data-stat="hp"] .stat-bar { background-color: #ff5959; } .stat-item[data-stat="attack"] .stat-bar { background-color: #f08030; } .stat-item[data-stat="defense"] .stat-bar { background-color: #f8d030; } .stat-item[data-stat="special-attack"] .stat-bar { background-color: #6890f0; } .stat-item[data-stat="special-defense"] .stat-bar { background-color: #78c850; } .stat-item[data-stat="speed"] .stat-bar { background-color: #f85888; }
+        .stat-value { text-align: right; font-weight: bold; color: #333; }
          /* Card View */
          #card-view { background-color: #fffbea; border: 5px solid #f5a623; border-radius: 15px; padding: 15px; min-height: 350px; font-family: 'Georgia', serif; color: #4b3e2e; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); position: relative; }
-         .card-header { /* ... */ display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-bottom: 2px solid #dcd0b9; padding-bottom: 5px;}
-         .card-name { /* ... */ font-size: 1.4em; font-weight: bold; text-transform: capitalize; }
-         .card-hp { /* ... */ font-size: 1.1em; font-weight: bold; color: #e63946; }
-         .card-hp::before { /* ... */ content: 'HP '; font-size: 0.8em; color: #e63946; }
-         .card-types { /* ... */ display: flex; gap: 5px; margin-top: 5px; margin-bottom: 10px; justify-content: flex-end; }
+         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; border-bottom: 2px solid #dcd0b9; padding-bottom: 5px;}
+         .card-name { font-size: 1.4em; font-weight: bold; text-transform: capitalize; }
+         .card-hp { font-size: 1.1em; font-weight: bold; color: #e63946; }
+         .card-hp::before { content: 'HP '; font-size: 0.8em; color: #e63946; }
+         .card-types { display: flex; gap: 5px; margin-top: 5px; margin-bottom: 10px; justify-content: flex-end; }
          #card-image-container { text-align: center; background-color: #f0f0f0; border: 2px solid #ccc; padding: 10px 0; margin: 10px 0; min-height: 180px; display:flex; justify-content: center; align-items: center; border-radius: 5px; }
-         #card-image { /* ... */ max-width: 80%; max-height: 180px; object-fit: contain; }
-         .card-details { /* ... */ font-size: 0.85em; margin-bottom: 10px; display: flex; justify-content: space-around; background-color: #eee; padding: 5px; border-radius: 5px;}
-         .card-abilities { /* ... */ margin-bottom: 10px; }
-         .card-abilities h4 { /* ... */ font-size: 0.9em; margin-bottom: 3px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
-         .card-abilities ul { /* ... */ list-style: none; padding-left: 0; font-size: 0.85em; }
-         .card-abilities li { /* ... */ text-transform: capitalize; }
+         #card-image { max-width: 80%; max-height: 180px; object-fit: contain; }
+         .card-details { font-size: 0.85em; margin-bottom: 10px; display: flex; justify-content: space-around; background-color: #eee; padding: 5px; border-radius: 5px;}
+         .card-abilities { margin-bottom: 10px; }
+         .card-abilities h4 { font-size: 0.9em; margin-bottom: 3px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+         .card-abilities ul { list-style: none; padding-left: 0; font-size: 0.85em; }
+         .card-abilities li { text-transform: capitalize; }
          .card-flavor-text { font-size: 0.8em; font-style: italic; color: #5c5246; background-color: #f8f4e9; padding: 8px; border-radius: 5px; border: 1px dashed #dcd0b9; min-height: 50px; margin-top: 10px; }
-
         /* Detail View Mode Switching */
         #detail-view-wrapper.show-card #sprite-view { display: none; }
         #detail-view-wrapper.show-card #card-view { display: block; }
         #detail-view-wrapper:not(.show-card) #sprite-view { display: flex; }
         #detail-view-wrapper:not(.show-card) #card-view { display: none; }
-
         /* Navigation */
         #navigation { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
         .nav-button { background-color: #4CAF50; border: none; color: white; padding: 12px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 1em; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .nav-button:hover:not(:disabled) { background-color: #45a049; }
         .nav-button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.6; }
-
         /* List View */
         #list-view { background-color: #f1f1f1; border: 3px solid #555; border-radius: 10px; padding: 10px; height: 500px; overflow-y: auto; display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .list-item { display: flex; align-items: center; padding: 6px; margin-bottom: 4px; background-color: #fff; border-radius: 5px; border: 1px solid #ddd; cursor: pointer; transition: background-color 0.2s; position: relative; }
         .list-item:hover { background-color: #e9e9e9; }
-        .list-item img { /* ... */ width: 35px; height: 35px; margin-right: 8px; image-rendering: pixelated; background-color: #eee; border-radius: 50%; }
-        .list-item-info { /* ... */ flex-grow: 1; overflow: hidden; }
-        .list-item-info .name { /* ... */ text-transform: capitalize; font-weight: bold; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .list-item-info .id { /* ... */ font-size: 0.75em; color: #666; }
-        .saved-indicator { /* ... */ position: absolute; top: 5px; right: 8px; font-size: 1.1em; color: #f5a623; display: none; }
+        .list-item img { width: 35px; height: 35px; margin-right: 8px; image-rendering: pixelated; background-color: #eee; border-radius: 50%; }
+        .list-item-info { flex-grow: 1; overflow: hidden; }
+        .list-item-info .name { text-transform: capitalize; font-weight: bold; font-size: 0.95em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .list-item-info .id { font-size: 0.75em; color: #666; }
+        .saved-indicator { position: absolute; top: 5px; right: 8px; font-size: 1.1em; color: #f5a623; display: none; }
         .list-item.saved .saved-indicator { display: block; }
-
         /* Loading/Error Indicator */
         #loading-indicator, #error-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; color: #555; background-color: rgba(241, 241, 241, 0.9); padding: 15px 20px; border-radius: 8px; z-index: 100; display: none; text-align: center; max-width: 80%; }
         #error-message { color: #e63946; }
         #detail-view-wrapper.loading #sprite-view, #detail-view-wrapper.loading #card-view, #detail-view-wrapper.error #sprite-view, #detail-view-wrapper.error #card-view { visibility: hidden; }
         #detail-view-wrapper.loading #loading-indicator, #detail-view-wrapper.error #error-message { display: block; }
-
         /* Utility class */
         .hidden { display: none !important; }
+
+        /* iOS Install Button Style */
+        #ios-install-button {
+            display: block; /* Or inline-block */
+            margin: 15px auto 5px auto; /* Center below main content */
+            padding: 10px 15px;
+            background-color: #007aff; /* iOS Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+        #ios-install-button:hover {
+             background-color: #0056b3;
+        }
 
     </style>
 </head>
@@ -216,7 +146,7 @@
     </div>
     <div id="pokedex-container">
         <div id="pokedex-header">
-             <span id="beta-indicator">(Beta)</span>
+            <span id="beta-indicator">(Beta)</span>
             <div class="view-toggle-buttons">
                 <button id="detail-view-btn" class="toggle-button active">Detail</button>
                 <button id="list-view-btn" class="toggle-button">List</button>
@@ -231,16 +161,15 @@
          <div id="error-message">Error loading data.</div>
 
         <div id="content-area">
-
             <div id="detail-view-wrapper" class="show-sprite">
                  <div id="detail-view-controls">
                      <button id="toggle-card-view-btn" title="Toggle Card/Sprite View">Show Card</button>
                  </div>
-                 <div id="sprite-view">
-                    <div id="pokemon-display"> <button id="collection-btn" title="Add to Collection">Add</button> <div id="pokemon-info"> <div id="pokemon-name">Pokémon</div> <div id="pokemon-id">#000</div> <img id="pokemon-sprite" src="" alt="Pokémon Sprite"> <div id="pokemon-types"></div> </div> </div> <div id="pokemon-stats"> <h3>Base Stats</h3> <div id="pokemon-stats-content"></div> </div>
+                <div id="sprite-view">
+                     <div id="pokemon-display"> <button id="collection-btn" title="Add to Collection">Add</button> <div id="pokemon-info"> <div id="pokemon-name">Pokémon</div> <div id="pokemon-id">#000</div> <img id="pokemon-sprite" src="" alt="Pokémon Sprite"> <div id="pokemon-types"></div> </div> </div> <div id="pokemon-stats"> <h3>Base Stats</h3> <div id="pokemon-stats-content"></div> </div>
                 </div>
                  <div id="card-view">
-                    <div class="card-header"> <span id="card-name" class="card-name">Name</span> <span id="card-hp" class="card-hp">0</span> </div> <div id="card-types" class="card-types"> </div> <div id="card-image-container"> <img id="card-image" src="" alt="Pokemon Artwork"> </div> <div id="card-details" class="card-details"> <span id="card-height">Height: ?</span> <span id="card-weight">Weight: ?</span> </div> <div id="card-abilities" class="card-abilities"> <h4>Abilities</h4> <ul id="card-abilities-list"><li>-</li></ul> </div> <div id="card-flavor-text" class="card-flavor-text"> Flavor text not available. </div>
+                     <div class="card-header"> <span id="card-name" class="card-name">Name</span> <span id="card-hp" class="card-hp">0</span> </div> <div id="card-types" class="card-types"> </div> <div id="card-image-container"> <img id="card-image" src="" alt="Pokemon Artwork"> </div> <div id="card-details" class="card-details"> <span id="card-height">Height: ?</span> <span id="card-weight">Weight: ?</span> </div> <div id="card-abilities" class="card-abilities"> <h4>Abilities</h4> <ul id="card-abilities-list"><li>-</li></ul> </div> <div id="card-flavor-text" class="card-flavor-text"> Flavor text not available. </div>
                  </div>
                  <div id="navigation">
                     <button id="prev-btn" class="nav-button">Previous</button>
@@ -249,21 +178,21 @@
             </div>
             <div id="list-view"></div>
         </div>
+         <a href="./pokedex.mobileconfig" download="pokedex.mobileconfig" id="ios-install-button">iOS Install</a>
     </div>
 
     <script>
+        // --- Constants, DOM Elements, State Variables ---
         const MAX_POKEMON = 1025;
         const API_BASE_URL = 'https://pokeapi.co/api/v2/pokemon/';
         const API_SPECIES_URL = 'https://pokeapi.co/api/v2/pokemon-species/';
         const SPRITE_URL_TEMPLATE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id}.png';
         const TYPE_COLORS = { normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030', grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0', ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820', rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848', steel: '#B8B8D0', fairy: '#EE99AC' };
         const MAX_STAT_VALUE = 200;
-
-        // --- DOM Elements ---
         const introOverlay = document.getElementById('intro-overlay');
         const skipIntroBtn = document.getElementById('skip-intro-btn');
-        const introSpriteElement = document.getElementById('intro-sprite'); // Reshiram
-        const devCreditSpriteElement = document.getElementById('dev-credit-sprite'); // Gothorita
+        const introSpriteElement = document.getElementById('intro-sprite');
+        const devCreditSpriteElement = document.getElementById('dev-credit-sprite');
         const detailWrapper = document.getElementById('detail-view-wrapper');
         const listWrapper = document.getElementById('list-view');
         const detailViewBtn = document.getElementById('detail-view-btn');
@@ -277,13 +206,11 @@
         const collectionBtn = document.getElementById('collection-btn');
         const prevButton = document.getElementById('prev-btn');
         const nextButton = document.getElementById('next-btn');
-        const spriteViewContainer = document.getElementById('sprite-view');
         const nameElement = document.getElementById('pokemon-name');
         const idElement = document.getElementById('pokemon-id');
         const spriteElement = document.getElementById('pokemon-sprite');
         const typesElement = document.getElementById('pokemon-types');
         const statsContentElement = document.getElementById('pokemon-stats-content');
-        const cardViewContainer = document.getElementById('card-view');
         const cardNameElement = document.getElementById('card-name');
         const cardHpElement = document.getElementById('card-hp');
         const cardTypesElement = document.getElementById('card-types');
@@ -292,128 +219,84 @@
         const cardWeightElement = document.getElementById('card-weight');
         const cardAbilitiesListElement = document.getElementById('card-abilities-list');
         const cardFlavorTextElement = document.getElementById('card-flavor-text');
-
-        // --- State Variables ---
         let currentPokemonId = 1;
         let currentView = 'detail';
         let detailViewMode = 'sprite';
         let allPokemonList = [];
         let savedPokemonIDs = [];
         let isShowingSaved = false;
-        let introTimer = null; // Timer for intro fade
+        let introTimer = null;
 
         // --- Helper Functions ---
-        function formatPokemonId(id) { /* ... */ return `#${id.toString().padStart(3, '0')}`; }
-        function getPokemonIdFromUrl(url) { /* ... */ try { return parseInt(url.split('/').filter(Boolean).pop()); } catch (e) { console.error("Error parsing ID from URL:", url, e); return null; } }
-        function showLoading(isLoading) { /* ... */ loadingIndicator.style.display = isLoading ? 'block' : 'none'; if (isLoading) errorMessage.style.display = 'none'; if (currentView === 'detail') { detailWrapper.classList.toggle('loading', isLoading); if(isLoading) detailWrapper.classList.remove('error'); } }
-        function showError(message) { /* ... */ errorMessage.textContent = message || 'An unknown error occurred.'; errorMessage.style.display = 'block'; loadingIndicator.style.display = 'none'; if (currentView === 'detail') { detailWrapper.classList.add('error'); detailWrapper.classList.remove('loading'); clearPokemonInfo(); } }
+        function formatPokemonId(id) { return `#${id.toString().padStart(3, '0')}`; }
+        function getPokemonIdFromUrl(url) { try { return parseInt(url.split('/').filter(Boolean).pop()); } catch (e) { console.error("Error parsing ID from URL:", url, e); return null; } }
+        function showLoading(isLoading) { loadingIndicator.style.display = isLoading ? 'block' : 'none'; if (isLoading) errorMessage.style.display = 'none'; if (currentView === 'detail') { detailWrapper.classList.toggle('loading', isLoading); if(isLoading) detailWrapper.classList.remove('error'); } }
+        function showError(message) { errorMessage.textContent = message || 'An unknown error occurred.'; errorMessage.style.display = 'block'; loadingIndicator.style.display = 'none'; if (currentView === 'detail') { detailWrapper.classList.add('error'); detailWrapper.classList.remove('loading'); clearPokemonInfo(); } }
 
         // --- Local Storage Functions ---
-        function loadSavedPokemon() { /* ... */ try { const saved = localStorage.getItem('savedPokemonIDs'); savedPokemonIDs = saved ? JSON.parse(saved) : []; if (!Array.isArray(savedPokemonIDs)) { savedPokemonIDs = []; } } catch (e) { console.error("Error loading saved Pokemon:", e); savedPokemonIDs = []; } }
-        function savePokemonToStorage() { /* ... */ try { localStorage.setItem('savedPokemonIDs', JSON.stringify(savedPokemonIDs)); } catch (e) { console.error("Error saving Pokemon to storage:", e); } }
-        function addPokemonToCollection(id) { /* ... */ if (id !== null && !savedPokemonIDs.includes(id)) { savedPokemonIDs.push(id); savePokemonToStorage(); updateCollectionButton(id); renderListView(searchInput.value, isShowingSaved); } }
-        function removePokemonFromCollection(id) { /* ... */ if (id !== null) { savedPokemonIDs = savedPokemonIDs.filter(savedId => savedId !== id); savePokemonToStorage(); updateCollectionButton(id); renderListView(searchInput.value, isShowingSaved); } }
+        function loadSavedPokemon() { try { const saved = localStorage.getItem('savedPokemonIDs'); savedPokemonIDs = saved ? JSON.parse(saved) : []; if (!Array.isArray(savedPokemonIDs)) { savedPokemonIDs = []; } } catch (e) { console.error("Error loading saved Pokemon:", e); savedPokemonIDs = []; } }
+        function savePokemonToStorage() { try { localStorage.setItem('savedPokemonIDs', JSON.stringify(savedPokemonIDs)); } catch (e) { console.error("Error saving Pokemon to storage:", e); } }
+        function addPokemonToCollection(id) { if (id !== null && !savedPokemonIDs.includes(id)) { savedPokemonIDs.push(id); savePokemonToStorage(); updateCollectionButton(id); renderListView(searchInput.value, isShowingSaved); } }
+        function removePokemonFromCollection(id) { if (id !== null) { savedPokemonIDs = savedPokemonIDs.filter(savedId => savedId !== id); savePokemonToStorage(); updateCollectionButton(id); renderListView(searchInput.value, isShowingSaved); } }
         function isPokemonSaved(id) { return id !== null && savedPokemonIDs.includes(id); }
 
         // --- View Switching (Main View: Detail/List) ---
-        function switchView(view) { /* ... */ currentView = view; showLoading(false); errorMessage.style.display = 'none'; detailWrapper.classList.remove('error', 'loading'); if (view === 'detail') { detailWrapper.classList.remove('hidden'); listWrapper.style.display = 'none'; detailViewBtn.classList.add('active'); listViewBtn.classList.remove('active'); searchControlsElement.style.display = 'none'; const displayedIdElement = detailWrapper.querySelector('#pokemon-id'); const displayedId = displayedIdElement ? parseInt(displayedIdElement.textContent.substring(1)) : null; if (displayedId !== currentPokemonId || detailWrapper.classList.contains('error')) { fetchPokemonData(currentPokemonId); } else { updateCollectionButton(currentPokemonId); } } else { detailWrapper.classList.add('hidden'); listWrapper.style.display = 'block'; detailViewBtn.classList.remove('active'); listViewBtn.classList.add('active'); searchControlsElement.style.display = 'flex'; renderListView(searchInput.value, isShowingSaved); } }
+        function switchView(view) { currentView = view; showLoading(false); errorMessage.style.display = 'none'; detailWrapper.classList.remove('error', 'loading'); if (view === 'detail') { detailWrapper.classList.remove('hidden'); listWrapper.style.display = 'none'; detailViewBtn.classList.add('active'); listViewBtn.classList.remove('active'); searchControlsElement.style.display = 'none'; const displayedIdElement = detailWrapper.querySelector('#pokemon-id'); const displayedId = displayedIdElement ? parseInt(displayedIdElement.textContent.substring(1)) : null; if (displayedId !== currentPokemonId || detailWrapper.classList.contains('error')) { fetchPokemonData(currentPokemonId); } else { updateCollectionButton(currentPokemonId); } } else { detailWrapper.classList.add('hidden'); listWrapper.style.display = 'block'; detailViewBtn.classList.remove('active'); listViewBtn.classList.add('active'); searchControlsElement.style.display = 'flex'; renderListView(searchInput.value, isShowingSaved); } }
 
         // --- Detail View Mode Switching (Sprite/Card) ---
-        function toggleDetailViewMode() { /* ... */ detailViewMode = (detailViewMode === 'sprite') ? 'card' : 'sprite'; detailWrapper.classList.toggle('show-sprite', detailViewMode === 'sprite'); detailWrapper.classList.toggle('show-card', detailViewMode === 'card'); toggleCardViewBtn.textContent = (detailViewMode === 'sprite') ? 'Show Card' : 'Show Sprite'; toggleCardViewBtn.classList.toggle('active', detailViewMode === 'card'); }
+        function toggleDetailViewMode() { detailViewMode = (detailViewMode === 'sprite') ? 'card' : 'sprite'; detailWrapper.classList.toggle('show-sprite', detailViewMode === 'sprite'); detailWrapper.classList.toggle('show-card', detailViewMode === 'card'); toggleCardViewBtn.textContent = (detailViewMode === 'sprite') ? 'Show Card' : 'Show Sprite'; toggleCardViewBtn.classList.toggle('active', detailViewMode === 'card'); }
 
         // --- List View Rendering ---
-        function renderListView(filter = '', showOnlySaved = false) { /* ... same list rendering logic ... */ listWrapper.innerHTML = ''; let filteredList = allPokemonList; if (showOnlySaved) { filteredList = filteredList.filter(pokemon => isPokemonSaved(pokemon.id)); } const searchTerm = filter.trim().toLowerCase(); if (searchTerm) { filteredList = filteredList.filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm) || pokemon.id.toString() === searchTerm || formatPokemonId(pokemon.id).toLowerCase() === searchTerm ); } if (filteredList.length === 0) { listWrapper.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No Pokémon match your criteria.</p>'; return; } const fragment = document.createDocumentFragment(); filteredList.forEach(pokemon => { const listItem = document.createElement('div'); listItem.classList.add('list-item'); listItem.dataset.id = pokemon.id; if (isPokemonSaved(pokemon.id)) { listItem.classList.add('saved'); } const sprite = document.createElement('img'); sprite.src = SPRITE_URL_TEMPLATE.replace('{id}', pokemon.id); sprite.alt = `${pokemon.name} sprite`; sprite.loading = 'lazy'; const info = document.createElement('div'); info.classList.add('list-item-info'); const name = document.createElement('div'); name.classList.add('name'); name.textContent = pokemon.name; const id = document.createElement('div'); id.classList.add('id'); id.textContent = formatPokemonId(pokemon.id); info.appendChild(name); info.appendChild(id); const savedIndicator = document.createElement('span'); savedIndicator.classList.add('saved-indicator'); savedIndicator.textContent = '★'; listItem.appendChild(sprite); listItem.appendChild(info); listItem.appendChild(savedIndicator); listItem.addEventListener('click', () => { currentPokemonId = pokemon.id; switchView('detail'); }); fragment.appendChild(listItem); }); listWrapper.appendChild(fragment); }
+        function renderListView(filter = '', showOnlySaved = false) { listWrapper.innerHTML = ''; let filteredList = allPokemonList; if (showOnlySaved) { filteredList = filteredList.filter(pokemon => isPokemonSaved(pokemon.id)); } const searchTerm = filter.trim().toLowerCase(); if (searchTerm) { filteredList = filteredList.filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm) || pokemon.id.toString() === searchTerm || formatPokemonId(pokemon.id).toLowerCase() === searchTerm ); } if (filteredList.length === 0) { listWrapper.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No Pokémon match your criteria.</p>'; return; } const fragment = document.createDocumentFragment(); filteredList.forEach(pokemon => { const listItem = document.createElement('div'); listItem.classList.add('list-item'); listItem.dataset.id = pokemon.id; if (isPokemonSaved(pokemon.id)) { listItem.classList.add('saved'); } const sprite = document.createElement('img'); sprite.src = SPRITE_URL_TEMPLATE.replace('{id}', pokemon.id); sprite.alt = `${pokemon.name} sprite`; sprite.loading = 'lazy'; const info = document.createElement('div'); info.classList.add('list-item-info'); const name = document.createElement('div'); name.classList.add('name'); name.textContent = pokemon.name; const id = document.createElement('div'); id.classList.add('id'); id.textContent = formatPokemonId(pokemon.id); info.appendChild(name); info.appendChild(id); const savedIndicator = document.createElement('span'); savedIndicator.classList.add('saved-indicator'); savedIndicator.textContent = '★'; listItem.appendChild(sprite); listItem.appendChild(info); listItem.appendChild(savedIndicator); listItem.addEventListener('click', () => { currentPokemonId = pokemon.id; switchView('detail'); }); fragment.appendChild(listItem); }); listWrapper.appendChild(fragment); }
 
         // --- Detail View Functions ---
-        async function fetchPokemonData(id) { /* ... same async fetch logic for pokemon and species ... */ if (id < 1 || id > MAX_POKEMON) return; showLoading(true); try { const [pokemonResponse, speciesResponse] = await Promise.allSettled([ fetch(`${API_BASE_URL}${id}`), fetch(`${API_SPECIES_URL}${id}`) ]); let pokemonData = null; let speciesData = null; let fetchError = null; if (pokemonResponse.status === 'fulfilled' && pokemonResponse.value.ok) { pokemonData = await pokemonResponse.value.json(); } else { const reason = pokemonResponse.reason || `Status ${pokemonResponse.value?.status}`; fetchError = new Error(`Pokemon data fetch failed: ${reason}`); console.error(fetchError); } if (speciesResponse.status === 'fulfilled' && speciesResponse.value.ok) { speciesData = await speciesResponse.value.json(); } else { const reason = speciesResponse.reason || `Status ${speciesResponse.value?.status}`; console.warn(`Species data fetch failed for ID ${id}: ${reason}`); } if (!pokemonData) { throw fetchError || new Error('Essential Pokémon data could not be loaded.'); } updateUIDetail(pokemonData, speciesData); showLoading(false); } catch (error) { console.error("Failed to fetch Pokémon details:", error); showError(`Error loading data for Pokémon ${id}. ${error.message}`); showLoading(false); } }
-        function clearPokemonInfo() { /* ... same clear logic ... */ nameElement.textContent = 'Error'; idElement.textContent = '#???'; spriteElement.src = ''; spriteElement.alt = 'Error loading sprite'; typesElement.innerHTML = ''; statsContentElement.innerHTML = ''; cardNameElement.textContent = 'Error'; cardHpElement.textContent = '0'; cardTypesElement.innerHTML = ''; cardImageElement.src = ''; cardImageElement.alt = 'Error loading image'; cardHeightElement.textContent = 'Height: ?'; cardWeightElement.textContent = 'Weight: ?'; cardAbilitiesListElement.innerHTML = '<li>-</li>'; cardFlavorTextElement.textContent = 'Error loading data.'; updateCollectionButton(null); prevButton.disabled = true; nextButton.disabled = true; }
-        function updateUIDetail(pokemonData, speciesData) { /* ... same update logic for both views ... */ if (!pokemonData) return; currentPokemonId = pokemonData.id; detailWrapper.classList.remove('error', 'loading'); const name = pokemonData.name; const id = pokemonData.id; const types = pokemonData.types.map(typeInfo => typeInfo.type.name); const stats = pokemonData.stats; const height = pokemonData.height / 10; const weight = pokemonData.weight / 10; const abilities = pokemonData.abilities.map(abilityInfo => abilityInfo.ability.name.replace('-', ' ')); const officialArtwork = pokemonData.sprites.other?.['official-artwork']?.front_default; const defaultSprite = pokemonData.sprites.front_default; const animatedSprite = pokemonData.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default; nameElement.textContent = name; idElement.textContent = formatPokemonId(id); spriteElement.src = animatedSprite || officialArtwork || defaultSprite || ''; spriteElement.alt = `${name} sprite`; updateTypesBadges(types, typesElement); statsContentElement.innerHTML = ''; const statMap = { 'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense', 'special-attack': 'Sp. Atk', 'special-defense': 'Sp. Def', 'speed': 'Speed' }; ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'].forEach(statKey => { const statData = stats.find(s => s.stat.name === statKey); if (statData) { const statValue = statData.base_stat; const statName = statMap[statKey]; const statPercentage = Math.min(100, (statValue / MAX_STAT_VALUE) * 100); const item = document.createElement('div'); item.classList.add('stat-item'); item.dataset.stat = statKey; const label = document.createElement('span'); label.classList.add('stat-label'); label.textContent = statName; const barContainer = document.createElement('div'); barContainer.classList.add('stat-bar-container'); const bar = document.createElement('div'); bar.classList.add('stat-bar'); requestAnimationFrame(() => { bar.style.width = `${statPercentage}%`; }); barContainer.appendChild(bar); const value = document.createElement('span'); value.classList.add('stat-value'); value.textContent = statValue; item.appendChild(label); item.appendChild(barContainer); item.appendChild(value); statsContentElement.appendChild(item); } }); cardNameElement.textContent = name; const hpStat = stats.find(s => s.stat.name === 'hp'); cardHpElement.textContent = hpStat ? hpStat.base_stat : '?'; updateTypesBadges(types, cardTypesElement); cardImageElement.src = officialArtwork || defaultSprite || ''; cardImageElement.alt = `${name} artwork`; cardHeightElement.textContent = `Height: ${height.toFixed(1)} m`; cardWeightElement.textContent = `Weight: ${weight.toFixed(1)} kg`; cardAbilitiesListElement.innerHTML = ''; if (abilities.length > 0) { abilities.forEach(ability => { const li = document.createElement('li'); li.textContent = ability; cardAbilitiesListElement.appendChild(li); }); } else { cardAbilitiesListElement.innerHTML = '<li>-</li>'; } let flavorText = 'Flavor text not available.'; if (speciesData && speciesData.flavor_text_entries) { const englishEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'en'); const preferredVersions = ['scarlet', 'violet', 'sword', 'shield', 'lets-go-pikachu', 'ultra-sun', 'sun']; let bestEntry = englishEntries.find(entry => preferredVersions.includes(entry.version.name)); if (!bestEntry && englishEntries.length > 0) { bestEntry = englishEntries[englishEntries.length - 1]; } if (bestEntry) { flavorText = bestEntry.flavor_text.replace(/[\n\f\r\u00ad]/g, ' ').replace(/\s+/g, ' ').trim(); } } cardFlavorTextElement.textContent = flavorText; prevButton.disabled = id === 1; nextButton.disabled = id === MAX_POKEMON; updateCollectionButton(id); }
-        function updateTypesBadges(types, containerElement) { /* ... same badge logic ... */ containerElement.innerHTML = ''; types.forEach(typeName => { const badge = document.createElement('span'); badge.classList.add('type-badge'); badge.textContent = typeName; badge.style.backgroundColor = TYPE_COLORS[typeName] || '#777'; containerElement.appendChild(badge); }); }
-        function updateCollectionButton(id) { /* ... same button logic ... */ if (id === null || !isPokemonSaved(id)) { collectionBtn.textContent = 'Add'; collectionBtn.title = 'Add to Collection'; collectionBtn.classList.remove('saved'); collectionBtn.onclick = () => addPokemonToCollection(id); } else { collectionBtn.textContent = 'Remove'; collectionBtn.title = 'Remove from Collection'; collectionBtn.classList.add('saved'); collectionBtn.onclick = () => removePokemonFromCollection(id); } collectionBtn.disabled = (id === null); }
-
+        async function fetchPokemonData(id) { if (id < 1 || id > MAX_POKEMON) return; showLoading(true); try { const [pokemonResponse, speciesResponse] = await Promise.allSettled([ fetch(`${API_BASE_URL}${id}`), fetch(`${API_SPECIES_URL}${id}`) ]); let pokemonData = null; let speciesData = null; let fetchError = null; if (pokemonResponse.status === 'fulfilled' && pokemonResponse.value.ok) { pokemonData = await pokemonResponse.value.json(); } else { const reason = pokemonResponse.reason || `Status ${pokemonResponse.value?.status}`; fetchError = new Error(`Pokemon data fetch failed: ${reason}`); console.error(fetchError); } if (speciesResponse.status === 'fulfilled' && speciesResponse.value.ok) { speciesData = await speciesResponse.value.json(); } else { const reason = speciesResponse.reason || `Status ${speciesResponse.value?.status}`; console.warn(`Species data fetch failed for ID ${id}: ${reason}`); } if (!pokemonData) { throw fetchError || new Error('Essential Pokémon data could not be loaded.'); } updateUIDetail(pokemonData, speciesData); showLoading(false); } catch (error) { console.error("Failed to fetch Pokémon details:", error); showError(`Error loading data for Pokémon ${id}. ${error.message}`); showLoading(false); } }
+        function clearPokemonInfo() { nameElement.textContent = 'Error'; idElement.textContent = '#???'; spriteElement.src = ''; spriteElement.alt = 'Error loading sprite'; typesElement.innerHTML = ''; statsContentElement.innerHTML = ''; cardNameElement.textContent = 'Error'; cardHpElement.textContent = '0'; cardTypesElement.innerHTML = ''; cardImageElement.src = ''; cardImageElement.alt = 'Error loading image'; cardHeightElement.textContent = 'Height: ?'; cardWeightElement.textContent = 'Weight: ?'; cardAbilitiesListElement.innerHTML = '<li>-</li>'; cardFlavorTextElement.textContent = 'Error loading data.'; updateCollectionButton(null); prevButton.disabled = true; nextButton.disabled = true; }
+        function updateUIDetail(pokemonData, speciesData) { if (!pokemonData) return; currentPokemonId = pokemonData.id; detailWrapper.classList.remove('error', 'loading'); const name = pokemonData.name; const id = pokemonData.id; const types = pokemonData.types.map(typeInfo => typeInfo.type.name); const stats = pokemonData.stats; const height = pokemonData.height / 10; const weight = pokemonData.weight / 10; const abilities = pokemonData.abilities.map(abilityInfo => abilityInfo.ability.name.replace('-', ' ')); const officialArtwork = pokemonData.sprites.other?.['official-artwork']?.front_default; const defaultSprite = pokemonData.sprites.front_default; const animatedSprite = pokemonData.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default; nameElement.textContent = name; idElement.textContent = formatPokemonId(id); spriteElement.src = animatedSprite || officialArtwork || defaultSprite || ''; spriteElement.alt = `${name} sprite`; updateTypesBadges(types, typesElement); statsContentElement.innerHTML = ''; const statMap = { 'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense', 'special-attack': 'Sp. Atk', 'special-defense': 'Sp. Def', 'speed': 'Speed' }; ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'].forEach(statKey => { const statData = stats.find(s => s.stat.name === statKey); if (statData) { const statValue = statData.base_stat; const statName = statMap[statKey]; const statPercentage = Math.min(100, (statValue / MAX_STAT_VALUE) * 100); const item = document.createElement('div'); item.classList.add('stat-item'); item.dataset.stat = statKey; const label = document.createElement('span'); label.classList.add('stat-label'); label.textContent = statName; const barContainer = document.createElement('div'); barContainer.classList.add('stat-bar-container'); const bar = document.createElement('div'); bar.classList.add('stat-bar'); requestAnimationFrame(() => { bar.style.width = `${statPercentage}%`; }); barContainer.appendChild(bar); const value = document.createElement('span'); value.classList.add('stat-value'); value.textContent = statValue; item.appendChild(label); item.appendChild(barContainer); item.appendChild(value); statsContentElement.appendChild(item); } }); cardNameElement.textContent = name; const hpStat = stats.find(s => s.stat.name === 'hp'); cardHpElement.textContent = hpStat ? hpStat.base_stat : '?'; updateTypesBadges(types, cardTypesElement); cardImageElement.src = officialArtwork || defaultSprite || ''; cardImageElement.alt = `${name} artwork`; cardHeightElement.textContent = `Height: ${height.toFixed(1)} m`; cardWeightElement.textContent = `Weight: ${weight.toFixed(1)} kg`; cardAbilitiesListElement.innerHTML = ''; if (abilities.length > 0) { abilities.forEach(ability => { const li = document.createElement('li'); li.textContent = ability; cardAbilitiesListElement.appendChild(li); }); } else { cardAbilitiesListElement.innerHTML = '<li>-</li>'; } let flavorText = 'Flavor text not available.'; if (speciesData && speciesData.flavor_text_entries) { const englishEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'en'); const preferredVersions = ['scarlet', 'violet', 'sword', 'shield', 'lets-go-pikachu', 'ultra-sun', 'sun']; let bestEntry = englishEntries.find(entry => preferredVersions.includes(entry.version.name)); if (!bestEntry && englishEntries.length > 0) { bestEntry = englishEntries[englishEntries.length - 1]; } if (bestEntry) { flavorText = bestEntry.flavor_text.replace(/[\n\f\r\u00ad]/g, ' ').replace(/\s+/g, ' ').trim(); } } cardFlavorTextElement.textContent = flavorText; prevButton.disabled = id === 1; nextButton.disabled = id === MAX_POKEMON; updateCollectionButton(id); }
+        function updateTypesBadges(types, containerElement) { containerElement.innerHTML = ''; types.forEach(typeName => { const badge = document.createElement('span'); badge.classList.add('type-badge'); badge.textContent = typeName; badge.style.backgroundColor = TYPE_COLORS[typeName] || '#777'; containerElement.appendChild(badge); }); }
+        function updateCollectionButton(id) { if (id === null || !isPokemonSaved(id)) { collectionBtn.textContent = 'Add'; collectionBtn.title = 'Add to Collection'; collectionBtn.classList.remove('saved'); collectionBtn.onclick = () => addPokemonToCollection(id); } else { collectionBtn.textContent = 'Remove'; collectionBtn.title = 'Remove from Collection'; collectionBtn.classList.add('saved'); collectionBtn.onclick = () => removePokemonFromCollection(id); } collectionBtn.disabled = (id === null); }
 
         // --- Initial Load Function ---
-        // Added fetch for intro sprites (Reshiram & Gothorita)
+        // Fetches intro sprites and main list/details async
         async function initializePokedex() {
-            loadSavedPokemon(); // Load saved IDs first
+            loadSavedPokemon();
 
             // --- Try to load Reshiram & Gothorita sprites for intro ---
             (async () => {
                 const introPokemonIDs = [643, 575]; // Reshiram, Gothorita
                 const elements = [introSpriteElement, devCreditSpriteElement];
                 const altTexts = ["Reshiram Animation", "Gothorita Sprite"];
-
                 try {
                     const responses = await Promise.allSettled(
                          introPokemonIDs.map(id => fetch(`${API_BASE_URL}${id}`))
                     );
-
                     responses.forEach(async (response, index) => {
-                         const element = elements[index];
-                         const altText = altTexts[index];
-                         if (!element) return; // Skip if element doesn't exist
-
+                         const element = elements[index]; const altText = altTexts[index];
+                         if (!element) return;
                          if (response.status === 'fulfilled' && response.value.ok) {
                              const data = await response.value.json();
-                             // Use same fallback logic as detail view
                              const animatedSprite = data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default;
                              const officialArtwork = data.sprites.other?.['official-artwork']?.front_default;
                              const defaultSprite = data.sprites.front_default;
                              const spriteSrc = animatedSprite || officialArtwork || defaultSprite || '';
-
-                             if (spriteSrc) {
-                                 element.src = spriteSrc;
-                                 element.alt = altText;
-                             } else {
-                                element.style.display = 'none'; // Hide if no sprite found
-                             }
-                         } else {
-                            element.style.display = 'none'; // Hide if fetch failed
-                            console.warn(`Could not fetch intro sprite data for ID ${introPokemonIDs[index]}: ${response.reason || response.value?.status}`);
-                         }
+                             if (spriteSrc) { element.src = spriteSrc; element.alt = altText; }
+                             else { element.style.display = 'none'; }
+                         } else { element.style.display = 'none'; console.warn(`Could not fetch intro sprite data for ID ${introPokemonIDs[index]}: ${response.reason || response.value?.status}`); }
                      });
-
-                } catch (error) {
-                    console.error("Could not load intro sprites:", error);
-                    // Hide both elements on general error during Promise.allSettled or processing
-                    elements.forEach(el => { if (el) el.style.display = 'none'; });
-                }
+                } catch (error) { console.error("Could not load intro sprites:", error); elements.forEach(el => { if (el) el.style.display = 'none'; }); }
             })();
-
 
             // --- Continue with main initialization (list fetch, etc.) ---
             try {
-                // Fetch the basic list asyncronously without blocking splash timer
                 (async () => {
                     const response = await fetch(`${API_BASE_URL}?limit=${MAX_POKEMON}&offset=0`);
-                    if (!response.ok) {
-                         throw new Error(`Failed to fetch Pokémon list: ${response.status}`);
-                    }
+                    if (!response.ok) { throw new Error(`Failed to fetch Pokémon list: ${response.status}`); }
                     const listData = await response.json();
-
-                    // Process the list
-                    allPokemonList = listData.results.map(pokemon => ({
-                        name: pokemon.name,
-                        url: pokemon.url,
-                        id: getPokemonIdFromUrl(pokemon.url)
-                    })).filter(p => p.id != null && p.id <= MAX_POKEMON);
-
-                    renderListView(); // Render the initial list view (hidden)
-                    // Switch to detail view - this triggers fetch for #1 in the background
-                    switchView('detail');
-
-                })().catch(error => { // Catch errors from the async list fetch IIFE
-                    console.error("Initialization failed (list fetch):", error);
-                    // Show error on the main screen (will appear after splash fades)
-                    showError(`Could not load Pokémon list or initial data. Please refresh. ${error.message}`);
-                    listViewBtn.disabled = true; // Disable list view button if the list fails
-                });
-
-            } catch (error) {
-                // Catch synchronous errors if any occur before main async block
-                console.error("Initialization setup failed:", error);
-                showError(`Initialization error. Please refresh. ${error.message}`);
-            }
+                    allPokemonList = listData.results.map(p => ({ name: p.name, url: p.url, id: getPokemonIdFromUrl(p.url) })).filter(p => p.id != null && p.id <= MAX_POKEMON);
+                    renderListView();
+                    switchView('detail'); // Fetch #1 data in background
+                })().catch(error => { console.error("Initialization failed (list fetch):", error); showError(`Could not load Pokémon list or initial data. Please refresh. ${error.message}`); listViewBtn.disabled = true; });
+            } catch (error) { console.error("Initialization setup failed:", error); showError(`Initialization error. Please refresh. ${error.message}`); }
         }
 
         // --- Event Listeners ---
@@ -424,27 +307,14 @@
         toggleCardViewBtn.addEventListener('click', toggleDetailViewMode);
         prevButton.addEventListener('click', () => { if (currentPokemonId > 1) { fetchPokemonData(currentPokemonId - 1); } });
         nextButton.addEventListener('click', () => { if (currentPokemonId < MAX_POKEMON) { fetchPokemonData(currentPokemonId + 1); } });
-        // Collection button listener attached dynamically
-
 
         // --- Start Initialization & Splash Screen Timer ---
         document.addEventListener('DOMContentLoaded', () => {
-            initializePokedex(); // Start fetching data (including intro sprites) immediately
-
+            initializePokedex(); // Start fetching data immediately
             // Set timer to hide splash screen after 6 seconds
-            introTimer = setTimeout(() => { // Store timer ID
-                if(introOverlay) { // Check if element exists
-                    introOverlay.classList.add('hidden');
-                }
-            }, 6000); // 6000 milliseconds = 6 seconds
-
+            introTimer = setTimeout(() => { if(introOverlay) { introOverlay.classList.add('hidden'); } }, 6000); // 6 seconds
             // Add Skip Button Listener
-            if (skipIntroBtn && introOverlay) { // Check if elements exist
-                skipIntroBtn.addEventListener('click', () => {
-                    clearTimeout(introTimer); // Cancel the 6-second timer
-                    introOverlay.classList.add('hidden'); // Hide overlay immediately
-                });
-            }
+            if (skipIntroBtn && introOverlay) { skipIntroBtn.addEventListener('click', () => { clearTimeout(introTimer); introOverlay.classList.add('hidden'); }); }
         });
 
     </script>
