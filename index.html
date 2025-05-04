@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Pokedex (1-1025) - Card View</title>
+    <title>Interactive Pokedex (1-1025) - Beta</title>
     <style>
         /* Basic Reset & Body Styling */
         * {
@@ -22,6 +22,91 @@
             padding: 15px;
         }
 
+        /* Intro Overlay Styles */
+        #intro-overlay {
+            position: fixed; /* Cover the entire viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #e63946; /* Pokedex Red background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200; /* Ensure it's above everything else */
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out; /* Fade-out transition */
+        }
+
+        #intro-content {
+            text-align: center;
+            color: white;
+            position: relative; /* Needed for skip button positioning */
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column; /* Stack elements vertically */
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 60px; /* Ensure space below content for button */
+        }
+
+        /* Intro Reshiram Sprite */
+        #intro-sprite {
+            width: 150px; /* Adjust size as needed */
+            height: 150px;
+            image-rendering: pixelated; /* Keep sprite crisp */
+            margin-bottom: 15px; /* Space below sprite */
+            /* Hide if src is empty or fails to load */
+            display: block; /* Initially block, hide if no src */
+        }
+        #intro-sprite[src=""] {
+             display: none;
+        }
+
+
+        #intro-title {
+            font-size: 3.5em; /* Slightly smaller title to accommodate sprite */
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+            margin-bottom: 20px; /* Space below title */
+             /* Consider adding a Pokemon-style font here if desired */
+        }
+
+        #intro-subtitle {
+            font-size: 1em;
+            color: #f1f1f1; /* Lighter text */
+            margin-top: auto; /* Push subtitle towards bottom (above button) */
+            margin-bottom: 15px; /* Position above skip button */
+        }
+
+        #skip-intro-btn { /* Skip Button Styling */
+            position: absolute;
+            bottom: 25px; /* Position near the bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        #skip-intro-btn:hover {
+            background: rgba(0,0,0,0.5);
+        }
+
+
+        /* Class to hide the overlay */
+        #intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+
         /* Pokedex Container */
         #pokedex-container {
             background-color: #e63946; /* Pokedex Red */
@@ -34,6 +119,8 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            position: relative; /* Ensure z-index context if needed, though overlay is higher */
+            z-index: 1;
         }
 
         /* Header: View Toggles & Search */
@@ -46,7 +133,23 @@
             padding: 5px;
             background-color: #b82531; /* Darker red accent */
             border-radius: 8px;
+            position: relative; /* Needed for beta indicator positioning */
         }
+
+        #beta-indicator { /* Beta Indicator Styling */
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.7em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(0,0,0,0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+            z-index: 5; /* Above header content but below potential modals */
+            pointer-events: none; /* Prevent interfering with clicks */
+        }
+
 
         .view-toggle-buttons {
             display: flex;
@@ -78,6 +181,7 @@
             gap: 5px;
             flex-grow: 1; /* Allow search to take space */
             min-width: 180px; /* Prevent excessive shrinking */
+            margin-right: 45px; /* Add margin so beta indicator doesn't overlap */
         }
 
         #search-input {
@@ -380,9 +484,17 @@
     </style>
 </head>
 <body>
-
+    <div id="intro-overlay">
+        <div id="intro-content">
+            <img id="intro-sprite" src="" alt="Intro Animation">
+            <div id="intro-title">Pokédex</div>
+            <button id="skip-intro-btn">Skip Intro</button>
+            <div id="intro-subtitle">under development - Skye</div>
+        </div>
+    </div>
     <div id="pokedex-container">
         <div id="pokedex-header">
+             <span id="beta-indicator">(Beta)</span>
             <div class="view-toggle-buttons">
                 <button id="detail-view-btn" class="toggle-button active">Detail</button>
                 <button id="list-view-btn" class="toggle-button">List</button>
@@ -462,6 +574,9 @@
         const MAX_STAT_VALUE = 200; // For scaling stat bars
 
         // --- DOM Elements ---
+        const introOverlay = document.getElementById('intro-overlay'); // For splash screen
+        const skipIntroBtn = document.getElementById('skip-intro-btn'); // Skip button
+        const introSpriteElement = document.getElementById('intro-sprite'); // Intro image element
         // Header/Global
         const detailWrapper = document.getElementById('detail-view-wrapper');
         const listWrapper = document.getElementById('list-view');
@@ -506,6 +621,7 @@
         let allPokemonList = []; // Stores {name: string, url: string, id: number}
         let savedPokemonIDs = []; // Stores IDs of saved Pokemon
         let isShowingSaved = false; // Filter state for list view
+        let introTimer = null; // Variable to hold the intro timer ID
 
 
         // --- Helper Functions ---
@@ -524,463 +640,169 @@
         }
 
         function showLoading(isLoading) {
-             // Global indicator visibility
              loadingIndicator.style.display = isLoading ? 'block' : 'none';
              if (isLoading) errorMessage.style.display = 'none';
-
-             // Apply loading class specifically to the detail view wrapper when active
              if (currentView === 'detail') {
                  detailWrapper.classList.toggle('loading', isLoading);
-                 // Ensure error class is removed when loading starts
                  if(isLoading) detailWrapper.classList.remove('error');
              }
          }
 
          function showError(message) {
              errorMessage.textContent = message || 'An unknown error occurred.';
-             errorMessage.style.display = 'block'; // Show global error message
-             loadingIndicator.style.display = 'none'; // Hide loading indicator
-
+             errorMessage.style.display = 'block';
+             loadingIndicator.style.display = 'none';
              if (currentView === 'detail') {
-                 detailWrapper.classList.add('error'); // Add error class to wrapper
-                 detailWrapper.classList.remove('loading'); // Remove loading class
-                 clearPokemonInfo(); // Clear detail view fields on error
+                 detailWrapper.classList.add('error');
+                 detailWrapper.classList.remove('loading');
+                 clearPokemonInfo();
              }
          }
 
         // --- Local Storage Functions ---
-
-        function loadSavedPokemon() {
-            try {
-                const saved = localStorage.getItem('savedPokemonIDs');
-                savedPokemonIDs = saved ? JSON.parse(saved) : [];
-                if (!Array.isArray(savedPokemonIDs)) { // Basic validation
-                     savedPokemonIDs = [];
-                }
-            } catch (e) {
-                console.error("Error loading saved Pokemon:", e);
-                savedPokemonIDs = [];
-            }
-        }
-
-        function savePokemonToStorage() {
-            try {
-                localStorage.setItem('savedPokemonIDs', JSON.stringify(savedPokemonIDs));
-            } catch (e) {
-                 console.error("Error saving Pokemon to storage:", e);
-            }
-        }
-
-        function addPokemonToCollection(id) {
-            if (id !== null && !savedPokemonIDs.includes(id)) {
-                savedPokemonIDs.push(id);
-                savePokemonToStorage();
-                updateCollectionButton(id);
-                renderListView(searchInput.value, isShowingSaved);
-            }
-        }
-
-        function removePokemonFromCollection(id) {
-            if (id !== null) {
-                savedPokemonIDs = savedPokemonIDs.filter(savedId => savedId !== id);
-                savePokemonToStorage();
-                updateCollectionButton(id);
-                renderListView(searchInput.value, isShowingSaved);
-            }
-        }
-
-        function isPokemonSaved(id) {
-            return id !== null && savedPokemonIDs.includes(id);
-        }
+        function loadSavedPokemon() { /* ... same ... */ try { const saved = localStorage.getItem('savedPokemonIDs'); savedPokemonIDs = saved ? JSON.parse(saved) : []; if (!Array.isArray(savedPokemonIDs)) { savedPokemonIDs = []; } } catch (e) { console.error("Error loading saved Pokemon:", e); savedPokemonIDs = []; } }
+        function savePokemonToStorage() { /* ... same ... */ try { localStorage.setItem('savedPokemonIDs', JSON.stringify(savedPokemonIDs)); } catch (e) { console.error("Error saving Pokemon to storage:", e); } }
+        function addPokemonToCollection(id) { /* ... same ... */ if (id !== null && !savedPokemonIDs.includes(id)) { savedPokemonIDs.push(id); savePokemonToStorage(); updateCollectionButton(id); renderListView(searchInput.value, isShowingSaved); } }
+        function removePokemonFromCollection(id) { /* ... same ... */ if (id !== null) { savedPokemonIDs = savedPokemonIDs.filter(savedId => savedId !== id); savePokemonToStorage(); updateCollectionButton(id); renderListView(searchInput.value, isShowingSaved); } }
+        function isPokemonSaved(id) { return id !== null && savedPokemonIDs.includes(id); }
 
         // --- View Switching (Main View: Detail/List) ---
-
         function switchView(view) {
             currentView = view;
+            showLoading(false); errorMessage.style.display = 'none'; detailWrapper.classList.remove('error', 'loading');
             if (view === 'detail') {
-                detailWrapper.classList.remove('hidden');
-                listWrapper.style.display = 'none';
-                detailViewBtn.classList.add('active');
-                listViewBtn.classList.remove('active');
-                searchControlsElement.style.display = 'none'; // <<< HIDE search/saved controls
-
-                // Fetch data ONLY if detail view isn't already showing valid data for current ID
-                // or if there was a previous error.
+                detailWrapper.classList.remove('hidden'); listWrapper.style.display = 'none';
+                detailViewBtn.classList.add('active'); listViewBtn.classList.remove('active');
+                searchControlsElement.style.display = 'none';
                 const displayedIdElement = detailWrapper.querySelector('#pokemon-id');
                 const displayedId = displayedIdElement ? parseInt(displayedIdElement.textContent.substring(1)) : null;
                 if (displayedId !== currentPokemonId || detailWrapper.classList.contains('error')) {
                      fetchPokemonData(currentPokemonId);
-                }
-            } else { // 'list'
-                detailWrapper.classList.add('hidden');
-                listWrapper.style.display = 'block';
-                detailViewBtn.classList.remove('active');
-                listViewBtn.classList.add('active');
-                searchControlsElement.style.display = 'flex'; // <<< SHOW search/saved controls
-
-                renderListView(searchInput.value, isShowingSaved); // Refresh list view if needed
+                } else { updateCollectionButton(currentPokemonId); }
+            } else { /* 'list' */
+                detailWrapper.classList.add('hidden'); listWrapper.style.display = 'block';
+                detailViewBtn.classList.remove('active'); listViewBtn.classList.add('active');
+                searchControlsElement.style.display = 'flex';
+                renderListView(searchInput.value, isShowingSaved);
             }
-             // Hide global indicators when switching views successfully
-            showLoading(false);
-             errorMessage.style.display = 'none';
-             detailWrapper.classList.remove('error', 'loading'); // Clean up states on detail view wrapper
         }
 
-
-         // --- Detail View Mode Switching (Sprite/Card) ---
-         function toggleDetailViewMode() {
-             detailViewMode = (detailViewMode === 'sprite') ? 'card' : 'sprite';
-             // Toggle the class on the wrapper which CSS uses to show/hide sections
-             detailWrapper.classList.toggle('show-sprite', detailViewMode === 'sprite');
-             detailWrapper.classList.toggle('show-card', detailViewMode === 'card');
-             // Update the button text/state
-             toggleCardViewBtn.textContent = (detailViewMode === 'sprite') ? 'Show Card' : 'Show Sprite';
-             toggleCardViewBtn.classList.toggle('active', detailViewMode === 'card');
-         }
-
+        // --- Detail View Mode Switching (Sprite/Card) ---
+         function toggleDetailViewMode() { detailViewMode = (detailViewMode === 'sprite') ? 'card' : 'sprite'; detailWrapper.classList.toggle('show-sprite', detailViewMode === 'sprite'); detailWrapper.classList.toggle('show-card', detailViewMode === 'card'); toggleCardViewBtn.textContent = (detailViewMode === 'sprite') ? 'Show Card' : 'Show Sprite'; toggleCardViewBtn.classList.toggle('active', detailViewMode === 'card'); }
 
         // --- List View Rendering ---
-
-        function renderListView(filter = '', showOnlySaved = false) {
-             listWrapper.innerHTML = ''; // Clear previous list
-             let filteredList = allPokemonList;
-
-             // Filter by saved status
-             if (showOnlySaved) {
-                 filteredList = filteredList.filter(pokemon => isPokemonSaved(pokemon.id));
-             }
-
-             // Filter by search term (name or ID)
-             const searchTerm = filter.trim().toLowerCase();
-             if (searchTerm) {
-                 filteredList = filteredList.filter(pokemon =>
-                     pokemon.name.toLowerCase().includes(searchTerm) ||
-                     pokemon.id.toString() === searchTerm ||
-                     formatPokemonId(pokemon.id).toLowerCase() === searchTerm
-                 );
-             }
-
-             if (filteredList.length === 0) {
-                 listWrapper.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No Pokémon match your criteria.</p>';
-                 return;
-             }
-
-             // Use DocumentFragment for performance when adding many elements
-             const fragment = document.createDocumentFragment();
-             filteredList.forEach(pokemon => {
-                 const listItem = document.createElement('div');
-                 listItem.classList.add('list-item');
-                 listItem.dataset.id = pokemon.id;
-                 if (isPokemonSaved(pokemon.id)) {
-                     listItem.classList.add('saved');
-                 }
-
-                 const sprite = document.createElement('img');
-                 // Use the predictable URL for list view sprites
-                 sprite.src = SPRITE_URL_TEMPLATE.replace('{id}', pokemon.id);
-                 sprite.alt = `${pokemon.name} sprite`;
-                 sprite.loading = 'lazy'; // Improve performance by lazy loading images
-
-                 const info = document.createElement('div');
-                 info.classList.add('list-item-info');
-                 const name = document.createElement('div');
-                 name.classList.add('name');
-                 name.textContent = pokemon.name;
-                 const id = document.createElement('div');
-                 id.classList.add('id');
-                 id.textContent = formatPokemonId(pokemon.id);
-
-                 info.appendChild(name);
-                 info.appendChild(id);
-
-                 const savedIndicator = document.createElement('span');
-                 savedIndicator.classList.add('saved-indicator');
-                 savedIndicator.textContent = '★'; // Star character for saved Pokemon
-
-                 listItem.appendChild(sprite);
-                 listItem.appendChild(info);
-                 listItem.appendChild(savedIndicator);
-
-                 // Add click listener to switch to detail view for this Pokemon
-                 listItem.addEventListener('click', () => {
-                     currentPokemonId = pokemon.id; // Set the global current ID
-                     switchView('detail');       // Switch to the detail view
-                 });
-
-                 fragment.appendChild(listItem); // Add the completed item to the fragment
-             });
-             listWrapper.appendChild(fragment); // Append the fragment to the DOM once
-         }
-
+        function renderListView(filter = '', showOnlySaved = false) { /* ... same list rendering logic ... */ listWrapper.innerHTML = ''; let filteredList = allPokemonList; if (showOnlySaved) { filteredList = filteredList.filter(pokemon => isPokemonSaved(pokemon.id)); } const searchTerm = filter.trim().toLowerCase(); if (searchTerm) { filteredList = filteredList.filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm) || pokemon.id.toString() === searchTerm || formatPokemonId(pokemon.id).toLowerCase() === searchTerm ); } if (filteredList.length === 0) { listWrapper.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No Pokémon match your criteria.</p>'; return; } const fragment = document.createDocumentFragment(); filteredList.forEach(pokemon => { const listItem = document.createElement('div'); listItem.classList.add('list-item'); listItem.dataset.id = pokemon.id; if (isPokemonSaved(pokemon.id)) { listItem.classList.add('saved'); } const sprite = document.createElement('img'); sprite.src = SPRITE_URL_TEMPLATE.replace('{id}', pokemon.id); sprite.alt = `${pokemon.name} sprite`; sprite.loading = 'lazy'; const info = document.createElement('div'); info.classList.add('list-item-info'); const name = document.createElement('div'); name.classList.add('name'); name.textContent = pokemon.name; const id = document.createElement('div'); id.classList.add('id'); id.textContent = formatPokemonId(pokemon.id); info.appendChild(name); info.appendChild(id); const savedIndicator = document.createElement('span'); savedIndicator.classList.add('saved-indicator'); savedIndicator.textContent = '★'; listItem.appendChild(sprite); listItem.appendChild(info); listItem.appendChild(savedIndicator); listItem.addEventListener('click', () => { currentPokemonId = pokemon.id; switchView('detail'); }); fragment.appendChild(listItem); }); listWrapper.appendChild(fragment); }
 
         // --- Detail View Functions ---
-
-        // Fetch data from BOTH pokemon and pokemon-species endpoints
-        async function fetchPokemonData(id) {
-            if (id < 1 || id > MAX_POKEMON) return;
-
-            showLoading(true); // Show loading indicator
-
-            try {
-                // Fetch base data and species data concurrently using Promise.allSettled
-                const [pokemonResponse, speciesResponse] = await Promise.allSettled([
-                    fetch(`${API_BASE_URL}${id}`),
-                    fetch(`${API_SPECIES_URL}${id}`)
-                ]);
-
-                let pokemonData = null;
-                let speciesData = null;
-                let fetchError = null;
-
-                // Process Pokemon data response
-                if (pokemonResponse.status === 'fulfilled' && pokemonResponse.value.ok) {
-                    pokemonData = await pokemonResponse.value.json();
-                } else {
-                    // Construct a meaningful error message
-                    const reason = pokemonResponse.reason || `Status ${pokemonResponse.value?.status}`;
-                    fetchError = new Error(`Pokemon data fetch failed: ${reason}`);
-                    console.error(fetchError);
-                }
-
-                // Process Species data response (optional)
-                if (speciesResponse.status === 'fulfilled' && speciesResponse.value.ok) {
-                    speciesData = await speciesResponse.value.json();
-                } else {
-                     // Log warning but don't necessarily stop the process
-                     const reason = speciesResponse.reason || `Status ${speciesResponse.value?.status}`;
-                     console.warn(`Species data fetch failed for ID ${id}: ${reason}`);
-                }
-
-                // If essential Pokemon data failed, show error and stop
-                if (!pokemonData) {
-                     throw fetchError || new Error('Essential Pokémon data could not be loaded.');
-                 }
-
-                updateUIDetail(pokemonData, speciesData); // Update UI with whatever data was fetched
-                showLoading(false); // Hide loading indicator
-
-            } catch (error) {
-                console.error("Failed to fetch Pokémon details:", error);
-                showError(`Error loading data for Pokémon ${id}. ${error.message}`);
-            }
-        }
-
-         // Clear Detail View UI elements (both sprite and card parts)
-         function clearPokemonInfo() {
-             // Sprite View fields
-             nameElement.textContent = 'Error'; idElement.textContent = '#???';
-             spriteElement.src = ''; spriteElement.alt = 'Error loading sprite';
-             typesElement.innerHTML = ''; statsContentElement.innerHTML = '';
-             // Card View fields
-             cardNameElement.textContent = 'Error'; cardHpElement.textContent = '0';
-             cardTypesElement.innerHTML = ''; cardImageElement.src = ''; cardImageElement.alt = 'Error loading image';
-             cardHeightElement.textContent = 'Height: ?'; cardWeightElement.textContent = 'Weight: ?';
-             cardAbilitiesListElement.innerHTML = '<li>-</li>'; cardFlavorTextElement.textContent = 'Error loading data.';
-             // Common controls
-             updateCollectionButton(null); // Update button state for error
-             prevButton.disabled = true; // Disable navigation on error
-             nextButton.disabled = true;
-         }
-
-        // Update BOTH Sprite and Card UI parts with fetched data
-        function updateUIDetail(pokemonData, speciesData) {
-             if (!pokemonData) return; // Safety check
-
-             currentPokemonId = pokemonData.id; // Ensure global ID is correct
-             detailWrapper.classList.remove('error', 'loading'); // Clear any error/loading states
-
-             // Extract data from pokemonData
-             const name = pokemonData.name;
-             const id = pokemonData.id;
-             const types = pokemonData.types.map(typeInfo => typeInfo.type.name);
-             const stats = pokemonData.stats;
-             const height = pokemonData.height / 10; // Decimetres to meters
-             const weight = pokemonData.weight / 10; // Hectograms to kilograms
-             const abilities = pokemonData.abilities.map(abilityInfo => abilityInfo.ability.name.replace('-', ' ')); // Nicer formatting
-             const officialArtwork = pokemonData.sprites.other?.['official-artwork']?.front_default;
-             const defaultSprite = pokemonData.sprites.front_default;
-             const animatedSprite = pokemonData.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default;
-
-             // --- Update Sprite View ---
-             nameElement.textContent = name;
-             idElement.textContent = formatPokemonId(id);
-             // Sprite Fallback Logic: Animated (Gen 1-5) -> Official Artwork -> Default Static
-             spriteElement.src = animatedSprite || officialArtwork || defaultSprite || '';
-             spriteElement.alt = `${name} sprite`;
-             updateTypesBadges(types, typesElement); // Use helper for types
-             // Update Stats Bars
-             statsContentElement.innerHTML = ''; // Clear previous stats
-             const statMap = { 'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense', 'special-attack': 'Sp. Atk', 'special-defense': 'Sp. Def', 'speed': 'Speed' };
-             ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'].forEach(statKey => {
-                 const statData = stats.find(s => s.stat.name === statKey);
-                 if (statData) {
-                     const statValue = statData.base_stat;
-                     const statName = statMap[statKey];
-                     const statPercentage = Math.min(100, (statValue / MAX_STAT_VALUE) * 100); // Cap bar at 100% visually
-                     // Create stat item elements (label, bar container, bar, value)
-                     const item = document.createElement('div'); item.classList.add('stat-item'); item.dataset.stat = statKey;
-                     const label = document.createElement('span'); label.classList.add('stat-label'); label.textContent = statName;
-                     const barContainer = document.createElement('div'); barContainer.classList.add('stat-bar-container');
-                     const bar = document.createElement('div'); bar.classList.add('stat-bar');
-                      // Apply width in next frame for CSS transition
-                      requestAnimationFrame(() => { bar.style.width = `${statPercentage}%`; });
-                     barContainer.appendChild(bar);
-                     const value = document.createElement('span'); value.classList.add('stat-value'); value.textContent = statValue;
-                     item.appendChild(label); item.appendChild(barContainer); item.appendChild(value);
-                     statsContentElement.appendChild(item);
-                 }
-             });
-
-
-             // --- Update Card View ---
-             cardNameElement.textContent = name;
-             const hpStat = stats.find(s => s.stat.name === 'hp');
-             cardHpElement.textContent = hpStat ? hpStat.base_stat : '?'; // Show HP value
-             updateTypesBadges(types, cardTypesElement); // Use helper for card types
-             // Card Image: Official Artwork or Default Static
-             cardImageElement.src = officialArtwork || defaultSprite || '';
-             cardImageElement.alt = `${name} artwork`;
-             cardHeightElement.textContent = `Height: ${height.toFixed(1)} m`; // Format height
-             cardWeightElement.textContent = `Weight: ${weight.toFixed(1)} kg`; // Format weight
-             // Abilities List
-             cardAbilitiesListElement.innerHTML = ''; // Clear previous
-             if (abilities.length > 0) {
-                 abilities.forEach(ability => {
-                     const li = document.createElement('li');
-                     li.textContent = ability;
-                     cardAbilitiesListElement.appendChild(li);
-                 });
-             } else {
-                 cardAbilitiesListElement.innerHTML = '<li>-</li>'; // Placeholder if no abilities
-             }
-             // Flavor Text (requires speciesData)
-             let flavorText = 'Flavor text not available.';
-             if (speciesData && speciesData.flavor_text_entries) {
-                 // Find the first English flavor text entry, preferring entries from recent games if possible
-                 const englishEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'en');
-                 const preferredVersions = ['scarlet', 'violet', 'sword', 'shield', 'lets-go-pikachu', 'ultra-sun', 'sun']; // Add more as needed
-                 let bestEntry = englishEntries.find(entry => preferredVersions.includes(entry.version.name));
-                 if (!bestEntry && englishEntries.length > 0) {
-                     bestEntry = englishEntries[englishEntries.length - 1]; // Fallback to the last english entry
-                 }
-
-                 if (bestEntry) {
-                      // Clean up flavor text (remove form feeds, newlines, soft hyphens etc.)
-                     flavorText = bestEntry.flavor_text.replace(/[\n\f\r\u00ad]/g, ' ').replace(/\s+/g, ' ').trim();
-                 }
-             }
-             cardFlavorTextElement.textContent = flavorText;
-
-
-             // --- Update Shared Controls ---
-             prevButton.disabled = id === 1; // Disable prev if first Pokemon
-             nextButton.disabled = id === MAX_POKEMON; // Disable next if last Pokemon
-             updateCollectionButton(id); // Update Add/Remove button state
-         }
-
-          // Helper function to update type badges in both sprite and card views
-          function updateTypesBadges(types, containerElement) {
-             containerElement.innerHTML = ''; // Clear previous types
-             types.forEach(typeName => {
-                 const badge = document.createElement('span');
-                 badge.classList.add('type-badge');
-                 badge.textContent = typeName;
-                 // Apply color based on type
-                 badge.style.backgroundColor = TYPE_COLORS[typeName] || '#777'; // Fallback color
-                 containerElement.appendChild(badge);
-             });
-         }
-
-
-        // Update the Add/Remove Collection button text, style, and click behavior
-        function updateCollectionButton(id) {
-            if (id === null || !isPokemonSaved(id)) { // If not saved or ID is invalid
-                collectionBtn.textContent = 'Add';
-                collectionBtn.title = 'Add to Collection';
-                collectionBtn.classList.remove('saved'); // Ensure 'saved' style is removed
-                collectionBtn.onclick = () => addPokemonToCollection(id); // Set click to add
-            } else { // If saved
-                collectionBtn.textContent = 'Remove';
-                collectionBtn.title = 'Remove from Collection';
-                collectionBtn.classList.add('saved'); // Add 'saved' style
-                collectionBtn.onclick = () => removePokemonFromCollection(id); // Set click to remove
-            }
-            collectionBtn.disabled = (id === null); // Disable button if ID is invalid (e.g., during error)
-        }
+        async function fetchPokemonData(id) { /* ... same async fetch logic for pokemon and species ... */ if (id < 1 || id > MAX_POKEMON) return; showLoading(true); try { const [pokemonResponse, speciesResponse] = await Promise.allSettled([ fetch(`${API_BASE_URL}${id}`), fetch(`${API_SPECIES_URL}${id}`) ]); let pokemonData = null; let speciesData = null; let fetchError = null; if (pokemonResponse.status === 'fulfilled' && pokemonResponse.value.ok) { pokemonData = await pokemonResponse.value.json(); } else { const reason = pokemonResponse.reason || `Status ${pokemonResponse.value?.status}`; fetchError = new Error(`Pokemon data fetch failed: ${reason}`); console.error(fetchError); } if (speciesResponse.status === 'fulfilled' && speciesResponse.value.ok) { speciesData = await speciesResponse.value.json(); } else { const reason = speciesResponse.reason || `Status ${speciesResponse.value?.status}`; console.warn(`Species data fetch failed for ID ${id}: ${reason}`); } if (!pokemonData) { throw fetchError || new Error('Essential Pokémon data could not be loaded.'); } updateUIDetail(pokemonData, speciesData); showLoading(false); } catch (error) { console.error("Failed to fetch Pokémon details:", error); showError(`Error loading data for Pokémon ${id}. ${error.message}`); showLoading(false); } }
+        function clearPokemonInfo() { /* ... same clear logic ... */ nameElement.textContent = 'Error'; idElement.textContent = '#???'; spriteElement.src = ''; spriteElement.alt = 'Error loading sprite'; typesElement.innerHTML = ''; statsContentElement.innerHTML = ''; cardNameElement.textContent = 'Error'; cardHpElement.textContent = '0'; cardTypesElement.innerHTML = ''; cardImageElement.src = ''; cardImageElement.alt = 'Error loading image'; cardHeightElement.textContent = 'Height: ?'; cardWeightElement.textContent = 'Weight: ?'; cardAbilitiesListElement.innerHTML = '<li>-</li>'; cardFlavorTextElement.textContent = 'Error loading data.'; updateCollectionButton(null); prevButton.disabled = true; nextButton.disabled = true; }
+        function updateUIDetail(pokemonData, speciesData) { /* ... same update logic for both views ... */ if (!pokemonData) return; currentPokemonId = pokemonData.id; detailWrapper.classList.remove('error', 'loading'); const name = pokemonData.name; const id = pokemonData.id; const types = pokemonData.types.map(typeInfo => typeInfo.type.name); const stats = pokemonData.stats; const height = pokemonData.height / 10; const weight = pokemonData.weight / 10; const abilities = pokemonData.abilities.map(abilityInfo => abilityInfo.ability.name.replace('-', ' ')); const officialArtwork = pokemonData.sprites.other?.['official-artwork']?.front_default; const defaultSprite = pokemonData.sprites.front_default; const animatedSprite = pokemonData.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default; nameElement.textContent = name; idElement.textContent = formatPokemonId(id); spriteElement.src = animatedSprite || officialArtwork || defaultSprite || ''; spriteElement.alt = `${name} sprite`; updateTypesBadges(types, typesElement); statsContentElement.innerHTML = ''; const statMap = { 'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense', 'special-attack': 'Sp. Atk', 'special-defense': 'Sp. Def', 'speed': 'Speed' }; ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'].forEach(statKey => { const statData = stats.find(s => s.stat.name === statKey); if (statData) { const statValue = statData.base_stat; const statName = statMap[statKey]; const statPercentage = Math.min(100, (statValue / MAX_STAT_VALUE) * 100); const item = document.createElement('div'); item.classList.add('stat-item'); item.dataset.stat = statKey; const label = document.createElement('span'); label.classList.add('stat-label'); label.textContent = statName; const barContainer = document.createElement('div'); barContainer.classList.add('stat-bar-container'); const bar = document.createElement('div'); bar.classList.add('stat-bar'); requestAnimationFrame(() => { bar.style.width = `${statPercentage}%`; }); barContainer.appendChild(bar); const value = document.createElement('span'); value.classList.add('stat-value'); value.textContent = statValue; item.appendChild(label); item.appendChild(barContainer); item.appendChild(value); statsContentElement.appendChild(item); } }); cardNameElement.textContent = name; const hpStat = stats.find(s => s.stat.name === 'hp'); cardHpElement.textContent = hpStat ? hpStat.base_stat : '?'; updateTypesBadges(types, cardTypesElement); cardImageElement.src = officialArtwork || defaultSprite || ''; cardImageElement.alt = `${name} artwork`; cardHeightElement.textContent = `Height: ${height.toFixed(1)} m`; cardWeightElement.textContent = `Weight: ${weight.toFixed(1)} kg`; cardAbilitiesListElement.innerHTML = ''; if (abilities.length > 0) { abilities.forEach(ability => { const li = document.createElement('li'); li.textContent = ability; cardAbilitiesListElement.appendChild(li); }); } else { cardAbilitiesListElement.innerHTML = '<li>-</li>'; } let flavorText = 'Flavor text not available.'; if (speciesData && speciesData.flavor_text_entries) { const englishEntries = speciesData.flavor_text_entries.filter(entry => entry.language.name === 'en'); const preferredVersions = ['scarlet', 'violet', 'sword', 'shield', 'lets-go-pikachu', 'ultra-sun', 'sun']; let bestEntry = englishEntries.find(entry => preferredVersions.includes(entry.version.name)); if (!bestEntry && englishEntries.length > 0) { bestEntry = englishEntries[englishEntries.length - 1]; } if (bestEntry) { flavorText = bestEntry.flavor_text.replace(/[\n\f\r\u00ad]/g, ' ').replace(/\s+/g, ' ').trim(); } } cardFlavorTextElement.textContent = flavorText; prevButton.disabled = id === 1; nextButton.disabled = id === MAX_POKEMON; updateCollectionButton(id); }
+        function updateTypesBadges(types, containerElement) { /* ... same badge logic ... */ containerElement.innerHTML = ''; types.forEach(typeName => { const badge = document.createElement('span'); badge.classList.add('type-badge'); badge.textContent = typeName; badge.style.backgroundColor = TYPE_COLORS[typeName] || '#777'; containerElement.appendChild(badge); }); }
+        function updateCollectionButton(id) { /* ... same button logic ... */ if (id === null || !isPokemonSaved(id)) { collectionBtn.textContent = 'Add'; collectionBtn.title = 'Add to Collection'; collectionBtn.classList.remove('saved'); collectionBtn.onclick = () => addPokemonToCollection(id); } else { collectionBtn.textContent = 'Remove'; collectionBtn.title = 'Remove from Collection'; collectionBtn.classList.add('saved'); collectionBtn.onclick = () => removePokemonFromCollection(id); } collectionBtn.disabled = (id === null); }
 
 
         // --- Initial Load Function ---
+        // Added logic to fetch Reshiram sprite at the start
         async function initializePokedex() {
-            showLoading(true); // Show loading indicator during init
-            loadSavedPokemon(); // Load saved IDs from localStorage first
+            loadSavedPokemon(); // Load saved IDs first
 
-            try {
-                // Fetch the basic list of all Pokemon names and URLs up to MAX_POKEMON
-                const response = await fetch(`${API_BASE_URL}?limit=${MAX_POKEMON}&offset=0`);
-                if (!response.ok) {
-                     throw new Error(`Failed to fetch Pokémon list: ${response.status}`);
+            // --- Try to load Reshiram sprite for intro ---
+            // Do this asynchronously so it doesn't block other init steps if slow
+            (async () => {
+                try {
+                    const reshiramId = 643;
+                    const res = await fetch(`${API_BASE_URL}${reshiramId}`);
+                    if (res.ok) {
+                        const reshiramData = await res.json();
+                        // Use same fallback logic as detail view
+                        const animatedSprite = reshiramData.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default;
+                        const officialArtwork = reshiramData.sprites.other?.['official-artwork']?.front_default;
+                        const defaultSprite = reshiramData.sprites.front_default;
+                        const introSpriteSrc = animatedSprite || officialArtwork || defaultSprite || '';
+
+                        if (introSpriteElement && introSpriteSrc) {
+                            introSpriteElement.src = introSpriteSrc;
+                            introSpriteElement.alt = "Reshiram Animation"; // Set alt text
+                        } else if (introSpriteElement) {
+                             introSpriteElement.style.display = 'none'; // Hide if no sprite found
+                        }
+                    } else {
+                         if (introSpriteElement) introSpriteElement.style.display = 'none';
+                         console.warn(`Could not fetch intro sprite data: ${res.status}`);
+                    }
+                } catch (error) {
+                    console.error("Could not load intro sprite:", error);
+                    if (introSpriteElement) introSpriteElement.style.display = 'none'; // Hide on error
                 }
-                const listData = await response.json();
+            })(); // Immediately invoke this async function
 
-                // Process the list, extracting name, URL, and ID
-                allPokemonList = listData.results.map(pokemon => ({
-                    name: pokemon.name,
-                    url: pokemon.url,
-                    id: getPokemonIdFromUrl(pokemon.url) // Extract ID using helper
-                })).filter(p => p.id != null && p.id <= MAX_POKEMON); // Ensure ID parsed correctly and within range
 
-                renderListView(); // Render the initial list view (even though it's hidden)
-                switchView('detail'); // Switch to detail view (this will trigger fetch for ID 1)
+            // --- Continue with main initialization (list fetch, etc.) ---
+            try {
+                // Fetch the basic list asyncronously without blocking splash timer
+                (async () => {
+                    const response = await fetch(`${API_BASE_URL}?limit=${MAX_POKEMON}&offset=0`);
+                    if (!response.ok) {
+                         throw new Error(`Failed to fetch Pokémon list: ${response.status}`);
+                    }
+                    const listData = await response.json();
+
+                    // Process the list
+                    allPokemonList = listData.results.map(pokemon => ({
+                        name: pokemon.name,
+                        url: pokemon.url,
+                        id: getPokemonIdFromUrl(pokemon.url)
+                    })).filter(p => p.id != null && p.id <= MAX_POKEMON);
+
+                    renderListView(); // Render the initial list view (hidden)
+                    // Switch to detail view - this triggers fetch for #1 in the background
+                    switchView('detail');
+
+                })().catch(error => { // Catch errors from the async list fetch IIFE
+                    console.error("Initialization failed (list fetch):", error);
+                    // Show error on the main screen (will appear after splash fades)
+                    showError(`Could not load Pokémon list or initial data. Please refresh. ${error.message}`);
+                    listViewBtn.disabled = true; // Disable list view button if the list fails
+                });
 
             } catch (error) {
-                console.error("Initialization failed:", error);
-                 showError(`Could not load Pokémon list. Please refresh. ${error.message}`);
-                 listViewBtn.disabled = true; // Disable list view button if the list fails
-                 showLoading(false); // Hide loading indicator on init failure
+                // Catch synchronous errors if any occur before main async block
+                console.error("Initialization setup failed:", error);
+                showError(`Initialization error. Please refresh. ${error.message}`);
             }
-            // Loading indicator is hidden within switchView/fetchPokemonData on success
+            // NOTE: Overlay hiding is handled by setTimeout/skip button in DOMContentLoaded listener
         }
 
         // --- Event Listeners ---
-        // View Toggles (Detail/List)
         detailViewBtn.addEventListener('click', () => switchView('detail'));
         listViewBtn.addEventListener('click', () => switchView('list'));
+        searchInput.addEventListener('input', () => { renderListView(searchInput.value, isShowingSaved); });
+        toggleSavedBtn.addEventListener('click', () => { isShowingSaved = !isShowingSaved; toggleSavedBtn.classList.toggle('active', isShowingSaved); toggleSavedBtn.title = isShowingSaved ? "Show All Pokémon" : "Show Saved Pokémon"; renderListView(searchInput.value, isShowingSaved); });
+        toggleCardViewBtn.addEventListener('click', toggleDetailViewMode);
+        prevButton.addEventListener('click', () => { if (currentPokemonId > 1) { fetchPokemonData(currentPokemonId - 1); } });
+        nextButton.addEventListener('click', () => { if (currentPokemonId < MAX_POKEMON) { fetchPokemonData(currentPokemonId + 1); } });
+        // Collection button listener attached dynamically
 
-        // Search Input (filters list view live)
-        searchInput.addEventListener('input', () => {
-            renderListView(searchInput.value, isShowingSaved);
-        });
 
-         // Toggle Saved Filter Button
-         toggleSavedBtn.addEventListener('click', () => {
-             isShowingSaved = !isShowingSaved; // Toggle the state
-             toggleSavedBtn.classList.toggle('active', isShowingSaved); // Update button style
-             toggleSavedBtn.title = isShowingSaved ? "Show All Pokémon" : "Show Saved Pokémon"; // Update tooltip
-             renderListView(searchInput.value, isShowingSaved); // Re-render list with new filter
-         });
+        // --- Start Initialization & Splash Screen Timer ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePokedex(); // Start fetching data (including Reshiram sprite) immediately
 
-        // Detail View Mode Toggle (Sprite/Card)
-         toggleCardViewBtn.addEventListener('click', toggleDetailViewMode);
+            // Set timer to hide splash screen after 4 seconds
+            introTimer = setTimeout(() => { // Store timer ID
+                if(introOverlay) { // Check if element exists
+                    introOverlay.classList.add('hidden');
+                }
+            }, 4000); // 4000 milliseconds = 4 seconds
 
-        // Detail View Navigation (Previous/Next)
-        prevButton.addEventListener('click', () => {
-            if (currentPokemonId > 1) {
-                // Don't decrement currentPokemonId here, let fetchPokemonData update it on success
-                fetchPokemonData(currentPokemonId - 1); // Fetch previous Pokemon
+            // Add Skip Button Listener
+            if (skipIntroBtn && introOverlay) { // Check if elements exist
+                skipIntroBtn.addEventListener('click', () => {
+                    clearTimeout(introTimer); // Cancel the 4-second timer
+                    introOverlay.classList.add('hidden'); // Hide overlay immediately
+                });
             }
         });
-        nextButton.addEventListener('click', () => {
-            if (currentPokemonId < MAX_POKEMON) {
-                // Don't increment currentPokemonId here, let fetchPokemonData update it on success
-                fetchPokemonData(currentPokemonId + 1); // Fetch next Pokemon
-            }
-        });
-
-        // Add/Remove collection button listener is attached dynamically in updateCollectionButton
-
-        // --- Start Initialization ---
-        // Run the initialization function once the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', initializePokedex);
 
     </script>
 
